@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Energy Audit of E-Waste — Appliance Comparison Bench</title>
 <meta name="description" content="Measurement bench for an energy audit of e-waste: enter voltage, current and power factor for an obsolete appliance and its replacement, and read off power, energy, cost, CO2 and payback. TANGEDCO tariffs, CEA emission factor." />
-<meta name="theme-color" content="#101418" />
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0E1216" media="(prefers-color-scheme: dark)" />
+<script>(function(){try{var s=localStorage.getItem('energy-audit-theme');document.documentElement.setAttribute('data-theme',(s==='light'||s==='dark')?s:(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Energy Audit of E-Waste" />
 <meta property="og:description" content="Compare an obsolete appliance against its efficient replacement — power, energy, cost, CO2 and the year the replacement pays for itself." />
@@ -38,12 +40,37 @@
      scrolled at a fixed minimum width instead of being squeezed to 4 px. */
   --svgf:1;
   --new:#0080A8;          /* 6500 K — the efficient path */
+
+  --tip-bg:#101418; --tip-fg:#FFFFFF; --tip-o:#F0B48A; --tip-n:#8FD6EE;
+  --sel-bg:#101418; --sel-fg:#FFFFFF;
+  --on-load:#FFFFFF;
+  --shadow:rgba(16,20,24,.13);
+  --flash:rgba(0,128,168,.16);
+}
+:root[data-theme="dark"]{
+  --ink:#E9EDF0;
+  --ink-2:#A5AFB9;
+  --ink-3:#7C8791;
+  --paper:#0E1216;
+  --panel:#161C22;
+  --rule:#2A323A;
+  --hair:#1C232A;
+
+  --old:#E08A45;
+  --new:#3FBFE4;
+
+  --tip-bg:#E9EDF0; --tip-fg:#0E1216; --tip-o:#A8500F; --tip-n:#0E7FA6;
+  --sel-bg:#E9EDF0; --sel-fg:#0E1216;
+  --on-load:#0E1216;
+  --shadow:rgba(0,0,0,.6);
+  --flash:rgba(63,191,228,.22);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-::selection{background:var(--ink);color:#fff}
+::selection{background:var(--sel-bg);color:var(--sel-fg)}
 html{background:var(--paper)}
 body{
   font-family:var(--ui);background:var(--paper);color:var(--ink);
+  transition:background-color .25s,color .25s;
   line-height:1.5;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
 }
 .wrap{max-width:none;padding:clamp(1.75rem,3vw,3rem) clamp(1.25rem,4vw,4rem) 5rem}
@@ -70,7 +97,18 @@ h1{
   text-transform:uppercase;
 }
 h1 em{font-style:normal;color:var(--ink-3)}
-.deck{font-size:.95rem;line-height:1.5;color:var(--ink-2);max-width:44ch;padding-bottom:.35rem}
+.deck{font-size:.95rem;line-height:1.5;color:var(--ink-2);max-width:44ch}
+.mast-side{display:flex;flex-direction:column;align-items:flex-start;gap:.9rem;padding-bottom:.35rem}
+
+.seg{display:inline-flex;border:1px solid var(--rule);background:var(--panel);flex-shrink:0}
+.seg button{
+  font-family:var(--mono);font-size:.57rem;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);background:none;border:0;cursor:pointer;
+  padding:.4rem .7rem;transition:color .15s,background-color .15s;
+}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
 
 /* ---------- layout ---------- */
 .layout{display:grid;grid-template-columns:minmax(280px,330px) 1fr;gap:0}
@@ -147,7 +185,7 @@ input[type=range]{width:100%;display:block;accent-color:var(--ink);height:20px;m
 #rig .load.n{fill:var(--new)}
 #rig .ghost{fill:none;stroke:var(--rule);stroke-width:1}
 #rig text{font-family:var(--mono)}
-#rig .v{font-size:calc(13.5px*var(--svgf));font-weight:600;fill:#fff;letter-spacing:-.5px}
+#rig .v{font-size:calc(13.5px*var(--svgf));font-weight:600;fill:var(--on-load);letter-spacing:-.5px}
 #rig .v.out{fill:var(--ink)}
 #rig .cap{font-size:calc(9.5px*var(--svgf));font-weight:500;fill:var(--ink-3);letter-spacing:.8px}
 #rig .row{font-size:calc(10.5px*var(--svgf));font-weight:600;fill:var(--ink);letter-spacing:.8px}
@@ -155,6 +193,11 @@ input[type=range]{width:100%;display:block;accent-color:var(--ink);height:20px;m
 #rig .save{font-size:calc(10.5px*var(--svgf));font-weight:600;fill:var(--new);letter-spacing:.3px;
   stroke:var(--panel);stroke-width:3px;paint-order:stroke fill}
 #rig .brk{stroke:var(--new);stroke-width:1.5;fill:none}
+#rig .flowline{fill:none;stroke-width:2.5;stroke-dasharray:4 11;stroke-linecap:round;opacity:0}
+#rig .flowline.o{stroke:var(--old)}
+#rig .flowline.n{stroke:var(--new)}
+#rig .flowline.run{opacity:.95;animation:flow linear infinite}
+@keyframes flow{to{stroke-dashoffset:-15}}
 
 /* ---------- hero ---------- */
 .hero{display:flex;flex-wrap:wrap;align-items:flex-end;gap:.5rem 2.5rem;margin-bottom:.9rem}
@@ -171,7 +214,7 @@ input[type=range]{width:100%;display:block;accent-color:var(--ink);height:20px;m
 .fig{flex:1 1 135px;padding:.8rem 1.2rem .8rem 0;border-right:1px solid var(--hair)}
 .fig:last-child{border-right:0}
 .fig:not(:first-child){padding-left:1.2rem}
-.fig dt{margin-bottom:.25rem}
+.fig dt{margin-bottom:.25rem;min-height:2.9em;display:flex;align-items:flex-start}
 .fig dd{font-family:var(--mono);font-size:1.05rem;font-weight:600;letter-spacing:-.04em}
 .fig dd .u{font-family:var(--ui);font-size:.68rem;font-weight:500;color:var(--ink-3);
   margin-left:.3rem;letter-spacing:0}
@@ -212,6 +255,22 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
 .stable tr.total th,.stable tr.total td{border-bottom:0;border-top:2px solid var(--ink);
   color:var(--new);font-weight:700;padding-top:.8rem}
 .stable tr.total th{font-family:var(--mono);font-size:.63rem;letter-spacing:.1em;text-transform:uppercase}
+.ov tbody th{font-family:var(--ui);font-size:.83rem;font-weight:600;text-transform:none;
+  letter-spacing:0;white-space:normal;min-width:170px}
+.ov tbody th button{
+  font:inherit;color:var(--ink);background:none;border:0;padding:0;cursor:pointer;
+  text-align:left;border-bottom:1px solid transparent;transition:border-color .15s,color .15s;
+}
+.ov tbody th button:hover{border-bottom-color:var(--ink)}
+.ov tr.on th button{color:var(--new);border-bottom-color:var(--new)}
+.ov td.bar{width:22%;min-width:110px}
+.ov .barwrap{display:block;height:9px;background:var(--hair);position:relative;overflow:hidden}
+.ov .barwrap i{position:absolute;inset:0 auto 0 0;background:var(--new);width:0;
+  transition:width .5s cubic-bezier(.32,.72,0,1)}
+.ov .chip{font-family:var(--mono);font-size:.56rem;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;padding:.2rem .4rem;white-space:nowrap}
+.ov .chip.keep{color:var(--old);border:1px solid var(--old)}
+.ov .chip.swap{color:var(--new);border:1px solid var(--new)}
 .rm{font-family:var(--mono);font-size:.72rem;line-height:1;color:var(--ink-3);
   background:none;border:0;cursor:pointer;padding:.2rem .3rem}
 .rm:hover{color:var(--old)}
@@ -240,11 +299,11 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
 .legend i{width:14px;height:3px;border-radius:2px;display:block}
 .tip{
   position:absolute;pointer-events:none;opacity:0;transition:opacity .12s;
-  background:var(--ink);color:#fff;padding:.5rem .65rem;font-family:var(--mono);
+  background:var(--tip-bg);color:var(--tip-fg);padding:.5rem .65rem;font-family:var(--mono);
   font-size:.66rem;line-height:1.6;white-space:nowrap;transform:translate(-50%,-115%);
 }
 .tip b{font-weight:600}
-.tip .o{color:#F0B48A}.tip .n{color:#8FD6EE}
+.tip .o{color:var(--tip-o)}.tip .n{color:var(--tip-n)}
 
 /* ---------- verdict ---------- */
 .verdict{border-left:3px solid var(--ink);padding:.1rem 0 .1rem 1.15rem;margin-bottom:2rem}
@@ -302,16 +361,16 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
   background:
     linear-gradient(to right,var(--sb),rgba(255,255,255,0)) left/26px 100% no-repeat local,
     linear-gradient(to left,var(--sb),rgba(255,255,255,0)) right/26px 100% no-repeat local,
-    radial-gradient(farthest-side at 0 50%,rgba(16,20,24,.13),rgba(255,255,255,0)) left/11px 100% no-repeat,
-    radial-gradient(farthest-side at 100% 50%,rgba(16,20,24,.13),rgba(255,255,255,0)) right/11px 100% no-repeat;
+    radial-gradient(farthest-side at 0 50%,var(--shadow),rgba(255,255,255,0)) left/11px 100% no-repeat,
+    radial-gradient(farthest-side at 100% 50%,var(--shadow),rgba(255,255,255,0)) right/11px 100% no-repeat;
 }
 .rig-scroll{--sb:var(--panel)}
 .rail{
   background:
     linear-gradient(var(--paper),rgba(255,255,255,0)) top/100% 22px no-repeat local,
     linear-gradient(rgba(255,255,255,0),var(--paper)) bottom/100% 22px no-repeat local,
-    radial-gradient(farthest-side at 50% 0,rgba(16,20,24,.11),rgba(255,255,255,0)) top/100% 10px no-repeat,
-    radial-gradient(farthest-side at 50% 100%,rgba(16,20,24,.11),rgba(255,255,255,0)) bottom/100% 10px no-repeat;
+    radial-gradient(farthest-side at 50% 0,var(--shadow),rgba(255,255,255,0)) top/100% 10px no-repeat,
+    radial-gradient(farthest-side at 50% 100%,var(--shadow),rgba(255,255,255,0)) bottom/100% 10px no-repeat;
 }
 #summary-wrap{scroll-margin:2.5rem}
 #chart{touch-action:pan-y}
@@ -329,7 +388,7 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
   @keyframes revealY{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
   @keyframes drawIn{from{stroke-dashoffset:var(--len)}to{stroke-dashoffset:0}}
   @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-  @keyframes rowIn{from{background:rgba(0,128,168,.16)}to{background:transparent}}
+  @keyframes rowIn{from{background:var(--flash)}to{background:transparent}}
   .masthead,.rail,.bench,.refs{animation:riseIn .55s cubic-bezier(.22,.7,.2,1) both}
   .rail{animation-delay:.05s}
   .bench{animation-delay:.11s}
@@ -351,6 +410,13 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
 /* ---------- print ---------- */
 @media print{
   @page{margin:13mm}
+  :root,:root[data-theme="dark"]{
+    --ink:#000;--ink-2:#333;--ink-3:#555;--paper:#fff;--panel:#f4f4f4;
+    --rule:#999;--hair:#ccc;--old:#A8500F;--new:#0080A8;--on-load:#fff;
+    --shadow:transparent;--flash:transparent;--svgf:1;
+  }
+  .seg{display:none !important}
+  #rig .flowline{display:none}
   html,body{background:#fff;color:#000;font-size:9.5pt;line-height:1.35}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .wrap{padding:0}
@@ -369,7 +435,6 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
     border-top:1px solid #999;border-bottom:1px solid #999;padding:.4rem 0;margin-bottom:.9rem}
   .figures,.table-wrap,.chart-wrap,.formula{margin-bottom:.9rem}
   .table-wrap{overflow:visible}
-  :root{--svgf:1}
   #rig,#chart{min-width:0}
   .table-wrap,.chart-scroll,.rig-scroll,.rail{background:none !important;overflow:visible !important}
   table.t{min-width:0;font-size:8pt}
@@ -395,9 +460,16 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
       <div class="eyebrow lbl">Activity 08 · E-waste management</div>
       <h1>Energy audit<br><em>of</em> e-waste</h1>
     </div>
-    <p class="deck">A measurement bench for obsolete appliances. Take readings at the
-      socket — voltage, current, power factor — or derate a nameplate rating, and the
-      rig returns power, energy, cost, CO₂ and the year the replacement pays for itself.</p>
+    <div class="mast-side">
+      <div class="seg" id="theme-seg" role="group" aria-label="Colour theme">
+        <button type="button" data-theme-set="light" aria-pressed="false">Light</button>
+        <button type="button" data-theme-set="dark" aria-pressed="false">Dark</button>
+        <button type="button" data-theme-set="auto" aria-pressed="false">Auto</button>
+      </div>
+      <p class="deck">A measurement bench for obsolete appliances. Take readings at the
+        socket — voltage, current, power factor — or derate a nameplate rating, and the
+        rig returns power, energy, cost, CO₂ and the year the replacement pays for itself.</p>
+    </div>
   </header>
 
   <div class="layout">
@@ -617,9 +689,11 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
           <path class="bus" d="M52 26 V196" />
 
           <path class="lead" d="M52 92 H150" />
+          <path class="flowline o" id="flow-o1" d="M52 92 H150" />
           <circle class="meter" cx="168" cy="92" r="17" />
           <text class="amp" x="168" y="97" text-anchor="middle">A</text>
           <path class="lead" d="M186 92 H222" />
+          <path class="flowline o" id="flow-o2" d="M186 92 H222" />
           <text class="row" x="0" y="70">OLD</text>
           <text class="amp" id="i-old" x="168" y="128" text-anchor="middle">0.00 A</text>
           <rect class="ghost" x="222" y="68" width="740" height="48" />
@@ -627,9 +701,11 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
           <text class="v" id="bar-old-val" x="236" y="98">0 W</text>
 
           <path class="lead" d="M52 180 H150" />
+          <path class="flowline n" id="flow-n1" d="M52 180 H150" />
           <circle class="meter" cx="168" cy="180" r="17" />
           <text class="amp" x="168" y="185" text-anchor="middle">A</text>
           <path class="lead" d="M186 180 H222" />
+          <path class="flowline n" id="flow-n2" d="M186 180 H222" />
           <text class="row" x="0" y="158">NEW</text>
           <text class="amp" id="i-new" x="168" y="216" text-anchor="middle">0.00 A</text>
           <rect class="ghost" x="222" y="156" width="740" height="48" />
@@ -659,7 +735,7 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
         <div class="fig"><dt class="lbl">CO₂ avoided</dt><dd id="m-co2">0<span class="u">kg/yr</span></dd></div>
         <div class="fig"><dt class="lbl">Power cut</dt><dd id="m-pct">0<span class="u">%</span></dd></div>
         <div class="fig"><dt class="lbl">Simple payback</dt><dd id="m-pay">—<span class="u">yr</span></dd></div>
-        <div class="fig"><dt class="lbl">Embodied CO₂ · new unit</dt><dd id="m-emb">0<span class="u">kg</span></dd></div>
+        <div class="fig"><dt class="lbl">Embodied CO₂ · new</dt><dd id="m-emb">0<span class="u">kg</span></dd></div>
         <div class="fig"><dt class="lbl">Carbon payback</dt><dd id="m-cpay">—<span class="u">yr</span></dd></div>
       </dl>
 
@@ -698,8 +774,14 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
       </div>
 
       <div class="block-head">
-        <span class="lbl">Cumulative cost — where replacing overtakes keeping</span>
-        <span class="lbl" id="chart-note"></span>
+        <span class="lbl" id="chart-title">Cumulative cost — where replacing overtakes keeping</span>
+        <div class="tools">
+          <span class="lbl" id="chart-note"></span>
+          <div class="seg" id="mode-seg" role="group" aria-label="Chart measure">
+            <button type="button" data-mode="money" aria-pressed="true">Money</button>
+            <button type="button" data-mode="carbon" aria-pressed="false">Carbon</button>
+          </div>
+        </div>
       </div>
       <div class="legend">
         <span><i style="background:var(--old)"></i>Keep the old unit</span>
@@ -721,6 +803,22 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
       </div>
 
       <div class="formula" id="formula"></div>
+
+      <div class="block-head">
+        <span class="lbl">Project comparisons · all three</span>
+        <span class="lbl" id="ov-note"></span>
+      </div>
+      <div class="table-wrap">
+        <table class="t ov">
+          <thead><tr>
+            <th scope="col">Appliance pair</th><th scope="col">Power</th>
+            <th scope="col">Energy saved</th><th scope="col">Relative</th>
+            <th scope="col">Cost saved</th><th scope="col">CO₂ avoided</th>
+            <th scope="col">Carbon payback</th><th scope="col">Verdict</th>
+          </tr></thead>
+          <tbody id="ov-body"></tbody>
+        </table>
+      </div>
 
       <div class="block-head">
         <span class="lbl">Audit summary <span id="count"></span></span>
@@ -977,6 +1075,56 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
   };
 
   /* ---------- the rig: a schematic that is also the chart ---------- */
+  function model(i){
+    let iOld, iNew, wOld, wNew;
+    if (i.measured){
+      iOld = i.aOld; iNew = i.aNew;
+      wOld = i.V * iOld * i.kOld; wNew = i.V * iNew * i.kNew;
+    } else {
+      wOld = i.ratedOld * i.lfO; wNew = i.ratedNew * i.lfN;
+      iOld = wOld / (i.V * i.kOld); iNew = wNew / (i.V * i.kNew);
+    }
+    const runH = i.h * i.d * 365, idleH = Math.max(0, 24 - i.h * i.d) * 365;
+    const eSbOld = i.sO * idleH / 1000, eSbNew = i.sN * idleH / 1000;
+    const eOld = wOld * runH / 1000 + eSbOld, eNew = wNew * runH / 1000 + eSbNew;
+    const kwh = Math.max(0, eOld - eNew), co2 = kwh * EF;
+    const cycleSaved = kwh / 6;
+    const t = i.isCustom ? i.customRate
+            : i.sched.flat !== undefined ? i.sched.flat
+            : effectiveRate(i.cycleUnits, cycleSaved, i.sched.slabs);
+    const saving = kwh * t;
+    const payback = (i.c > 0 && saving > 0) ? i.c / saving : null;
+    const embShare = Math.min(.95, Math.max(0, i.embShare));
+    const embKg = eNew * i.lifeY * EF * (embShare / (1 - embShare));
+    return {wOld, wNew, iOld, iNew, vaOld:i.V * iOld, vaNew:i.V * iNew,
+            runH, idleH, eSbOld, eSbNew, eOld, eNew, kwh, co2, cycleSaved,
+            t, saving, payback, embShare, embKg, cPay: co2 > 0 ? embKg / co2 : null};
+  }
+
+  const THEME_KEY = 'energy-audit-theme';
+  const sysDark = window.matchMedia('(prefers-color-scheme: dark)');
+  function themePref(){
+    try { const s = localStorage.getItem(THEME_KEY); return (s === 'light' || s === 'dark') ? s : 'auto'; }
+    catch (e) { return 'auto'; }
+  }
+  function paintTheme(){
+    const pref = themePref();
+    document.documentElement.setAttribute('data-theme',
+      pref === 'auto' ? (sysDark.matches ? 'dark' : 'light') : pref);
+    el('theme-seg').querySelectorAll('button').forEach(b =>
+      b.setAttribute('aria-pressed', String(b.dataset.themeSet === pref)));
+  }
+  el('theme-seg').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    try {
+      if (b.dataset.themeSet === 'auto') localStorage.removeItem(THEME_KEY);
+      else localStorage.setItem(THEME_KEY, b.dataset.themeSet);
+    } catch (err) {}
+    paintTheme();
+  });
+  sysDark.addEventListener('change', () => { if (themePref() === 'auto') paintTheme(); });
+  paintTheme();
+
   const RIG = {x:222, max:740};
   function drawRig(wOld, wNew, iOld, iNew, V){
     const peak = Math.max(wOld, wNew, 1);
@@ -992,6 +1140,14 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
       t.setAttribute('x', RIG.x + (inside ? 14 : w + 12));
       t.classList.toggle('out', !inside);
     });
+    [['o', iOld], ['n', iNew]].forEach(([k, amps]) => {
+      const dur = Math.max(.45, Math.min(3.5, .9 / Math.max(amps, .05)));
+      ['1', '2'].forEach(n => {
+        const node = el('flow-' + k + n);
+        node.style.animationDuration = dur.toFixed(2) + 's';
+        node.classList.toggle('run', !REDUCE && amps > .001);
+      });
+    });
     const gap = wo - wn;
     if (gap > 30){
       const a = RIG.x + wn, b = RIG.x + wo;
@@ -1006,8 +1162,30 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
 
   /* ---------- payback crossover ---------- */
   const C = {w:1000, h:330, l:78, r:96, t:16, b:44};
+  const kfmt = v => v >= 1000 ? Math.round(v / 100) / 10 + 'k' : String(Math.round(v));
+  const MODES = {
+    money: {
+      title:'Cumulative cost — where replacing overtakes keeping',
+      axis:v => '₹' + kfmt(v),
+      tip:v => inr(v),
+      cross:'PAYS BACK ',
+      empty:'Add a replacement cost to see the crossover',
+      none:'No saving — the lines never meet'
+    },
+    carbon: {
+      title:'Cumulative CO₂ — where the replacement earns back its manufacture',
+      axis:v => kfmt(v) + ' kg',
+      tip:v => Math.round(v).toLocaleString('en-IN') + ' kg',
+      cross:'CARBON PAYBACK ',
+      empty:'Set an embodied share above zero to see the crossover',
+      none:'No CO₂ saving — the lines never meet'
+    }
+  };
+  let chartMode = 'money';
   let chartState = null, firstChart = true;
   function drawChart(annualOld, annualNew, capex){
+    const M = MODES[chartMode];
+    el('chart-title').textContent = M.title;
     const svg = el('chart');
     while (svg.childNodes.length > 1) svg.removeChild(svg.lastChild);   // keep <title>
     const mk = (tag, at) => { const n = document.createElementNS(NS, tag);
@@ -1025,7 +1203,7 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
     for (let v = 0; v <= yMax; v += gs){
       svg.appendChild(mk('line', {class:'grid', x1:C.l, y1:py(v), x2:C.w - C.r, y2:py(v)}));
       const lb = mk('text', {x:C.l - 10, y:py(v) + 4, 'text-anchor':'end'});
-      lb.textContent = '₹' + (v >= 1000 ? Math.round(v / 100) / 10 + 'k' : Math.round(v));
+      lb.textContent = M.axis(v);
       svg.appendChild(lb);
     }
     svg.appendChild(mk('line', {class:'axis', x1:C.l, y1:C.h - C.b, x2:C.w - C.r, y2:C.h - C.b}));
@@ -1065,7 +1243,7 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
       svg.appendChild(mk('circle', {class:'dot' + mark, cx:cx, cy:cy, r:6, fill:'var(--new)'}));
       const t = mk('text', {class:'crosslab' + mark, x:cx, y:cy - 20,
         'text-anchor':cx > C.w * .72 ? 'end' : 'middle'});
-      t.textContent = 'PAYS BACK ' + pay.toFixed(1) + ' YR';
+      t.textContent = M.cross + pay.toFixed(1) + ' YR';
       svg.appendChild(t);
     }
 
@@ -1076,9 +1254,9 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
     svg.appendChild(mk('rect', {x:C.l, y:C.t, width:C.w - C.l - C.r, height:C.h - C.b - C.t,
       fill:'transparent', style:'cursor:crosshair'}));
 
-    chartState = {annualOld, annualNew, capex, years, px, py, hair, d1, d2};
+    chartState = {annualOld, annualNew, capex, years, px, py, hair, d1, d2, tip:M.tip};
     el('chart-note').textContent = pay === null
-      ? (capex <= 0 ? 'Add a replacement cost to see the crossover' : 'No saving — the lines never meet')
+      ? (capex <= 0 ? M.empty : M.none)
       : pay > years ? 'Crossover beyond ' + years + ' years' : '';
     firstChart = false;
   }
@@ -1101,7 +1279,7 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
     s.d2.setAttribute('cx', s.px(t)); s.d2.setAttribute('cy', s.py(vn)); s.d2.setAttribute('opacity', 1);
     const tip = el('tip');
     tip.innerHTML = '<b>Year ' + t.toFixed(1) + '</b><br><span class="o">Keep</span> '
-      + inr(vo) + '<br><span class="n">Replace</span> ' + inr(vn);
+      + s.tip(vo) + '<br><span class="n">Replace</span> ' + s.tip(vn);
     // Placed against the wrapper, not the drawing: on a narrow screen the
     // drawing scrolls inside the wrapper and a percentage would drift.
     const wr = el('tip').parentNode.getBoundingClientRect();
@@ -1142,24 +1320,26 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
       ? 'Both factors entered by you — the table reports them as measured.'
       : 'Preset factors are typical for the appliance type, not readings. Overwrite them with wattmeter values and the table will say so.';
 
-    // P = V·I·cosφ when measured; nameplate × load factor when rated. The two
-    // units derate separately: a CRT measures near 60% of its plate while the
-    // LED monitor replacing it sits near 85%, and a shared figure would hide
-    // most of the difference the audit is trying to find.
     const lfO = +lfOld.value / 100, lfN = +lfNew.value / 100;
-    let iOld, iNew, wOld, wNew;
-    if (measured){
-      iOld = Math.max(0, +ampsOld.value || 0); iNew = Math.max(0, +ampsNew.value || 0);
-      wOld = V * iOld * kOld;                  wNew = V * iNew * kNew;
-    } else {
-      wOld = (+oldw.value) * lfO;              wNew = (+neww.value) * lfN;
-      iOld = wOld / (V * kOld);                iNew = wNew / (V * kNew);
-    }
-    const vaOld = V * iOld, vaNew = V * iNew;
-    // Standby is the load an appliance carries while it is "off but plugged
-    // in" — for a CRT that is 18 hours a day, which is the same order as the
-    // whole saving. Duty cycle alone assumes zero draw when idle.
     const sO = Math.max(0, +sbOld.value || 0), sN = Math.max(0, +sbNew.value || 0);
+    const sched = SCHEDULES[tariff.value] || SCHEDULES.gross;
+    const isFlat = sched.flat !== undefined;
+    const isCustom = tariff.value === 'custom-rate';
+    const cycleUnits = Math.max(0, +units.value || 0);
+    const lifeY = +life.value;
+    const M = model({
+      measured, V, kOld, kNew,
+      aOld:Math.max(0, +ampsOld.value || 0), aNew:Math.max(0, +ampsNew.value || 0),
+      ratedOld:+oldw.value, ratedNew:+neww.value, lfO, lfN, sO, sN, h, d,
+      sched, isCustom, customRate:Math.max(0, parseFloat(rate.value) || 0),
+      cycleUnits, c, lifeY, embShare:+emb.value / 100
+    });
+    const wOld = M.wOld, wNew = M.wNew, iOld = M.iOld, iNew = M.iNew;
+    const vaOld = M.vaOld, vaNew = M.vaNew, runH = M.runH;
+    const eSbOld = M.eSbOld, eSbNew = M.eSbNew, eOld = M.eOld, eNew = M.eNew;
+    const kwh = M.kwh, co2 = M.co2, cycleSaved = M.cycleSaved, t = M.t;
+    const saving = M.saving, payback = M.payback;
+    const embShare = M.embShare, embKg = M.embKg, cPay = M.cPay;
 
     const provV  = (touched.volts && vOk) ? 'measured' : 'assumed';
     const provIO = measured ? (touched.ampsOld ? 'measured' : 'seeded') : 'derived';
@@ -1186,40 +1366,12 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
       : preset.options[preset.selectedIndex].text;
     el('subject').textContent = subject;
 
-    const runH = h * d * 365, idleH = Math.max(0, 24 - h * d) * 365;
-    const eRunOld = wOld * runH / 1000, eRunNew = wNew * runH / 1000;
-    const eSbOld  = sO * idleH / 1000,  eSbNew  = sN * idleH / 1000;
-    const eOld = eRunOld + eSbOld, eNew = eRunNew + eSbNew;
-    const kwh = Math.max(0, eOld - eNew);
-    const co2 = kwh * EF;
-
-    // The rate depends on how much is saved, so it has to come after the
-    // energy: telescopic billing prices the saving off the top of the bill.
-    const sched = SCHEDULES[tariff.value] || SCHEDULES.gross;
-    const isFlat = sched.flat !== undefined;
-    const isCustom = tariff.value === 'custom-rate';
     el('rate-field').hidden = !isCustom;
     el('units-field').hidden = isFlat;
-    const cycleUnits = Math.max(0, +units.value || 0);
-    const cycleSaved = kwh / 6;                       // six bi-monthly cycles a year
-    let t;
-    if (isCustom)      t = Math.max(0, parseFloat(rate.value) || 0);
-    else if (isFlat)   t = sched.flat;
-    else               t = effectiveRate(cycleUnits, cycleSaved, sched.slabs);
     if (!isFlat) el('slab-note').textContent =
       'At ' + Math.round(cycleUnits) + ' units a cycle your top band is ₹'
       + marginalRate(cycleUnits, sched.slabs).toFixed(2) + '/unit. This saving takes '
       + cycleSaved.toFixed(0) + ' units off that top, worth ₹' + t.toFixed(2) + '/unit.';
-
-    const saving = kwh * t;
-    const payback = (c > 0 && saving > 0) ? c / saving : null;
-
-    // Embodied carbon, derived from the new unit's own operating figures via
-    // the cited embodied share rather than an invented absolute: if a share s
-    // of lifecycle energy is embodied, embodied = operating × s/(1−s).
-    const lifeY = +life.value, embShare = Math.min(.95, +emb.value / 100);
-    const embKg = eNew * lifeY * EF * (embShare / (1 - embShare));
-    const cPay = co2 > 0 ? embKg / co2 : null;
 
     setMetric('m-cost', saving, inr, 'per year');
     setMetric('m-kwh', kwh, roundOf, 'kWh/yr');
@@ -1271,7 +1423,8 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
     el('meter-label').textContent = measured ? 'Measured real power' : 'Effective real power (derated)';
     el('scale').textContent = '0 — ' + Math.max(wOld, wNew, 1).toFixed(0) + ' W';
     drawRig(wOld, wNew, iOld, iNew, V);
-    drawChart(eOld * t, eNew * t, c);
+    if (chartMode === 'carbon') drawChart(eOld * EF, eNew * EF, embKg);
+    else drawChart(eOld * t, eNew * t, c);
 
     const lines = measured
       ? [eq('P(old)', V + ' V × ' + iOld.toFixed(2) + ' A × ' + kOld.toFixed(2) + ' pf = ' + wOld.toFixed(1) + ' W'),
@@ -1332,7 +1485,74 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
             old:{i:iOld, pf:kOld, va:vaOld, w:wOld, sb:sO, e:eOld, provI:provIO, provP:provPO, provS:provSO},
             neu:{i:iNew, pf:kNew, va:vaNew, w:wNew, sb:sN, e:eNew, provI:provIN, provP:provPN, provS:provSN},
             kwh, saving, co2, payback};
+    updateOverview();
     persist();
+  }
+
+  const OV = ['crt', 'cfl', 'fan'];
+  const labelFor = k => preset.querySelector('option[value="' + k + '"]').textContent;
+  function ovShared(){
+    const v = parseFloat(volts.value);
+    return {
+      V:(isFinite(v) && v >= 80 && v <= 270) ? v : 230,
+      sched:SCHEDULES[tariff.value] || SCHEDULES.gross,
+      isCustom:tariff.value === 'custom-rate',
+      customRate:Math.max(0, parseFloat(rate.value) || 0),
+      cycleUnits:Math.max(0, +units.value || 0)
+    };
+  }
+  function ovModel(k, s){
+    const p = PRESETS[k];
+    return model({measured:false, V:s.V, kOld:p.pfOld, kNew:p.pfNew, aOld:0, aNew:0,
+      ratedOld:p.wOld, ratedNew:p.wNew, lfO:p.lfOld / 100, lfN:p.lfNew / 100,
+      sO:p.sbOld, sN:p.sbNew, h:p.h, d:p.duty / 100, sched:s.sched,
+      isCustom:s.isCustom, customRate:s.customRate, cycleUnits:s.cycleUnits,
+      c:p.cost, lifeY:p.life, embShare:p.emb / 100});
+  }
+  function buildOverview(){
+    el('ov-body').innerHTML = OV.map(k =>
+      '<tr data-k="' + k + '"><th scope="row"><button type="button" data-load="' + k + '">'
+      + esc(labelFor(k)) + '</button></th>'
+      + '<td data-c="w"></td><td data-c="kwh"></td>'
+      + '<td class="bar"><span class="barwrap"><i></i></span></td>'
+      + '<td data-c="save"></td><td data-c="co2"></td><td data-c="cpay"></td>'
+      + '<td data-c="verdict"></td></tr>').join('')
+      + '<tr class="total"><th scope="row">All three</th><td></td><td data-t="kwh"></td>'
+      + '<td></td><td data-t="save"></td><td data-t="co2"></td><td data-t="cpay"></td><td></td></tr>';
+    el('ov-body').addEventListener('click', e => {
+      const b = e.target.closest('button[data-load]');
+      if (!b) return;
+      preset.value = b.dataset.load;
+      applyPreset();
+    });
+  }
+  function updateOverview(){
+    const s = ovShared();
+    const ms = OV.map(k => ovModel(k, s));
+    const peak = Math.max.apply(null, ms.map(m => m.kwh).concat([1]));
+    let tk = 0, ts = 0, tc = 0, te = 0;
+    OV.forEach((k, n) => {
+      const m = ms[n], p = PRESETS[k];
+      const row = el('ov-body').querySelector('tr[data-k="' + k + '"]');
+      const put = (c, html) => { row.querySelector('[data-c="' + c + '"]').innerHTML = html; };
+      row.classList.toggle('on', preset.value === k);
+      put('w', m.wOld.toFixed(1) + ' → ' + m.wNew.toFixed(1) + '<small>W</small>');
+      put('kwh', Math.round(m.kwh).toLocaleString('en-IN') + '<small>kWh/yr</small>');
+      row.querySelector('.barwrap i').style.width = (m.kwh / peak * 100).toFixed(1) + '%';
+      put('save', inr(m.saving) + '<small>/yr</small>');
+      put('co2', Math.round(m.co2).toLocaleString('en-IN') + '<small>kg/yr</small>');
+      put('cpay', m.cPay === null ? '—' : m.cPay > 99 ? '99+' : m.cPay.toFixed(1) + '<small>yr</small>');
+      const keep = m.cPay !== null && m.cPay > p.life;
+      put('verdict', '<span class="chip ' + (keep ? 'keep">Keep' : 'swap">Replace') + '</span>');
+      tk += m.kwh; ts += m.saving; tc += m.co2; te += m.embKg;
+    });
+    const tot = el('ov-body').querySelector('tr.total');
+    const putT = (c, html) => { tot.querySelector('[data-t="' + c + '"]').innerHTML = html; };
+    putT('kwh', Math.round(tk).toLocaleString('en-IN') + '<small>kWh/yr</small>');
+    putT('save', inr(ts) + '<small>/yr</small>');
+    putT('co2', Math.round(tc).toLocaleString('en-IN') + '<small>kg/yr</small>');
+    putT('cpay', tc > 0 ? (te / tc).toFixed(1) + '<small>yr</small>' : '—');
+    el('ov-note').textContent = 'Preset figures for each pair, priced at your tariff';
   }
 
   /* ---------- audit summary ---------- */
@@ -1583,6 +1803,18 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
     near(effectiveRate(450, 0, G), 6.65, 1e-9, 'zero saving falls back to the marginal rate');
     near(3 * 18 * 365 / 1000, 19.71, 1e-9, 'standby energy over an 18 h idle day');
     near(29 * 8 * EF * (.81 / (1 - .81)), 702.2, .5, 'embodied carbon from the cited share');
+    const crt = PRESETS.crt;
+    const mc = model({measured:false, V:230, kOld:crt.pfOld, kNew:crt.pfNew, aOld:0, aNew:0,
+      ratedOld:crt.wOld, ratedNew:crt.wNew, lfO:crt.lfOld / 100, lfN:crt.lfNew / 100,
+      sO:crt.sbOld, sN:crt.sbNew, h:crt.h, d:crt.duty / 100, sched:SCHEDULES.gross,
+      isCustom:false, customRate:0, cycleUnits:450, c:crt.cost, lifeY:crt.life,
+      embShare:crt.emb / 100});
+    near(mc.wOld, 66, 1e-9, 'model derates the old unit at its own load factor');
+    near(mc.wNew, 18.7, 1e-9, 'model derates the new unit at its own load factor');
+    near(mc.kwh, 121.326, 1e-6, 'model reproduces the CRT energy saving');
+    near(mc.embKg, 1039.37, .05, 'model reproduces the CRT embodied carbon');
+    near(mc.cPay, 12.07, .02, 'model reproduces the CRT carbon payback');
+    near(mc.t, 6.65, 1e-9, 'model prices the CRT saving in the 401-500 band');
     const bad = out.filter(l => l.indexOf('FAIL') === 0).length;
     window.__selftest = {passed: out.length - bad, failed: bad, log: out};
     console.log('[energy-audit selftest] ' + (out.length - bad) + '/' + out.length + ' passed');
@@ -1599,6 +1831,16 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
    sbOld, sbNew, hrs, duty, tariff, units, rate, cost, life, emb]
     .forEach(x => x.addEventListener('input', calc));
   el('btn-reset').addEventListener('click', resetInputs);
+  el('mode-seg').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b || b.dataset.mode === chartMode) return;
+    chartMode = b.dataset.mode;
+    el('mode-seg').querySelectorAll('button').forEach(x =>
+      x.setAttribute('aria-pressed', String(x.dataset.mode === chartMode)));
+    firstChart = true;
+    calc();
+  });
+  buildOverview();
   if (restore()) calc(); else applyPreset();
   renderAudit();
   selfTest();
