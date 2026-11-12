@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Energy Audit of E-Waste — Appliance Comparison Bench</title>
-<meta name="description" content="Measurement bench for an energy audit of e-waste: enter voltage, current and power factor for an obsolete appliance and its replacement, and read off power, energy, cost, CO2 and payback. TANGEDCO tariffs, CEA emission factor." />
+<meta name="description" content="Measurement bench for an energy audit of e-waste: enter voltage, current and power factor for an obsolete appliance and its replacement, and read off power, energy, cost, CO2 and payback. CRT vs LED monitor, CFL vs LED lamp, old fan vs BLDC fan." />
 <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
 <meta name="theme-color" content="#0E1216" media="(prefers-color-scheme: dark)" />
 <script>(function(){try{var s=localStorage.getItem('energy-audit-theme');document.documentElement.setAttribute('data-theme',(s==='light'||s==='dark')?s:(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));}catch(e){document.documentElement.setAttribute('data-theme','light');}})();</script>
@@ -45,9 +45,10 @@
   --sel-bg:#101418; --sel-fg:#FFFFFF;
   --on-load:#FFFFFF;
   --shadow:rgba(16,20,24,.13);
-  --flash:rgba(0,128,168,.16);
+  color-scheme:light;
 }
 :root[data-theme="dark"]{
+  color-scheme:dark;
   --ink:#E9EDF0;
   --ink-2:#A5AFB9;
   --ink-3:#7C8791;
@@ -63,7 +64,6 @@
   --sel-bg:#E9EDF0; --sel-fg:#0E1216;
   --on-load:#0E1216;
   --shadow:rgba(0,0,0,.6);
-  --flash:rgba(63,191,228,.22);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 ::selection{background:var(--sel-bg);color:var(--sel-fg)}
@@ -142,6 +142,7 @@ h1 em{font-style:normal;color:var(--ink-3)}
 
 .field{margin-bottom:1.25rem}
 .field:last-child{margin-bottom:0}
+#rated-inputs{margin-bottom:1.25rem}
 [hidden]{display:none !important}
 label{display:block;font-size:.78rem;font-weight:600;margin-bottom:.4rem}
 label .hint{display:block;font-weight:400;color:var(--ink-3);font-size:.71rem;margin-top:.1rem}
@@ -153,6 +154,12 @@ select,input[type=text],input[type=number]{
 select{appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:1.4rem;
   background:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M0 0l4.5 6L9 0z' fill='%23101418'/%3E%3C/svg%3E") no-repeat right .2rem center;
 }
+/* The arrow is a data URI and cannot read a custom property, so the dark
+   theme carries its own copy; the option list is given explicit colours. */
+:root[data-theme="dark"] select{
+  background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M0 0l4.5 6L9 0z' fill='%23E9EDF0'/%3E%3C/svg%3E");
+}
+option,optgroup{background:var(--paper);color:var(--ink)}
 select:hover,input[type=text]:hover,input[type=number]:hover{border-bottom-color:var(--ink)}
 input::placeholder{color:var(--ink-3)}
 :focus-visible{outline:2px solid var(--ink);outline-offset:3px}
@@ -248,15 +255,13 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
 .t tr.old th{color:var(--old)}
 .t tr.gain th,.t tr.gain td{color:var(--new);border-bottom:0;font-weight:600}
 
-.stable tbody th{font-family:var(--ui);font-size:.83rem;font-weight:600;text-transform:none;
-  letter-spacing:0;white-space:normal;min-width:180px}
-.stable td.b{font-family:var(--ui);font-size:.68rem;font-weight:500;color:var(--ink-3);
-  text-transform:uppercase;letter-spacing:.06em}
-.stable tr.total th,.stable tr.total td{border-bottom:0;border-top:2px solid var(--ink);
-  color:var(--new);font-weight:700;padding-top:.8rem}
-.stable tr.total th{font-family:var(--mono);font-size:.63rem;letter-spacing:.1em;text-transform:uppercase}
 .ov tbody th{font-family:var(--ui);font-size:.83rem;font-weight:600;text-transform:none;
   letter-spacing:0;white-space:normal;min-width:170px}
+.ov td.b{font-family:var(--ui);font-size:.68rem;font-weight:500;color:var(--ink-3);
+  text-transform:uppercase;letter-spacing:.06em}
+.ov tr.total th,.ov tr.total td{border-bottom:0;border-top:2px solid var(--ink);
+  color:var(--new);font-weight:700;padding-top:.8rem}
+.ov tr.total th{font-family:var(--mono);font-size:.63rem;letter-spacing:.1em;text-transform:uppercase}
 .ov tbody th button{
   font:inherit;color:var(--ink);background:none;border:0;padding:0;cursor:pointer;
   text-align:left;border-bottom:1px solid transparent;transition:border-color .15s,color .15s;
@@ -267,14 +272,6 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
 .ov .barwrap{display:block;height:9px;background:var(--hair);position:relative;overflow:hidden}
 .ov .barwrap i{position:absolute;inset:0 auto 0 0;background:var(--new);width:0;
   transition:width .5s cubic-bezier(.32,.72,0,1)}
-.ov .chip{font-family:var(--mono);font-size:.56rem;font-weight:600;letter-spacing:.08em;
-  text-transform:uppercase;padding:.2rem .4rem;white-space:nowrap}
-.ov .chip.keep{color:var(--old);border:1px solid var(--old)}
-.ov .chip.swap{color:var(--new);border:1px solid var(--new)}
-.rm{font-family:var(--mono);font-size:.72rem;line-height:1;color:var(--ink-3);
-  background:none;border:0;cursor:pointer;padding:.2rem .3rem}
-.rm:hover{color:var(--old)}
-.empty{font-size:.82rem;color:var(--ink-3);max-width:58ch;margin-bottom:2.25rem;line-height:1.5}
 
 /* ---------- payback crossover chart ---------- */
 .chart-wrap{position:relative;margin-bottom:2.25rem}
@@ -372,10 +369,9 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
     radial-gradient(farthest-side at 50% 0,var(--shadow),rgba(255,255,255,0)) top/100% 10px no-repeat,
     radial-gradient(farthest-side at 50% 100%,var(--shadow),rgba(255,255,255,0)) bottom/100% 10px no-repeat;
 }
-#summary-wrap{scroll-margin:2.5rem}
 #chart{touch-action:pan-y}
-.stable tbody tr:hover td,.stable tbody tr:hover th{background:var(--hair)}
-.stable tbody tr.total:hover td,.stable tbody tr.total:hover th{background:none}
+.ov tbody tr:hover td,.ov tbody tr:hover th{background:var(--hair)}
+.ov tbody tr.total:hover td,.ov tbody tr.total:hover th{background:none}
 .tools button:active{transform:translateY(1px)}
 
 /* ---------- motion ----------
@@ -388,7 +384,6 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
   @keyframes revealY{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
   @keyframes drawIn{from{stroke-dashoffset:var(--len)}to{stroke-dashoffset:0}}
   @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-  @keyframes rowIn{from{background:var(--flash)}to{background:transparent}}
   .masthead,.rail,.bench,.refs{animation:riseIn .55s cubic-bezier(.22,.7,.2,1) both}
   .rail{animation-delay:.05s}
   .bench{animation-delay:.11s}
@@ -397,7 +392,6 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
   #chart .ln.enter{stroke-dasharray:var(--len);
     animation:drawIn .85s .2s cubic-bezier(.32,.72,0,1) both}
   #chart .enter-fade{animation:fadeIn .4s .8s both}
-  .stable tbody tr.in td,.stable tbody tr.in th{animation:rowIn .9s ease-out both}
 }
 
 @media (max-width:880px){
@@ -413,14 +407,14 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
   :root,:root[data-theme="dark"]{
     --ink:#000;--ink-2:#333;--ink-3:#555;--paper:#fff;--panel:#f4f4f4;
     --rule:#999;--hair:#ccc;--old:#A8500F;--new:#0080A8;--on-load:#fff;
-    --shadow:transparent;--flash:transparent;--svgf:1;
+    --shadow:transparent;--svgf:1;color-scheme:light;
   }
   .seg{display:none !important}
   #rig .flowline{display:none}
   html,body{background:#fff;color:#000;font-size:9.5pt;line-height:1.35}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .wrap{padding:0}
-  .rail,.tools,.rm,.tip{display:none !important}
+  .rail,.tools,.tip{display:none !important}
   .print-only{display:block}
   .layout{display:block}
   .bench{padding-left:0}
@@ -439,7 +433,7 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
   .table-wrap,.chart-scroll,.rig-scroll,.rail{background:none !important;overflow:visible !important}
   table.t{min-width:0;font-size:8pt}
   .t th,.t td{padding:.3rem .45rem}
-  .stable tbody th{font-size:8pt;min-width:0}
+  .ov tbody th{font-size:8pt;min-width:0}
   .verdict{margin-bottom:.8rem}
   .verdict-text{font-size:9.5pt;max-width:none}
   .formula{font-size:7.5pt;line-height:1.7;overflow:visible}
@@ -488,14 +482,6 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
                 <option value="cfl">CFL lamp → LED lamp</option>
                 <option value="fan">Old induction fan → BLDC fan</option>
               </optgroup>
-              <optgroup label="Other pairs">
-                <option value="incandescent">Incandescent bulb → LED bulb</option>
-                <option value="tube">Tube light + choke → LED tube</option>
-                <option value="halogen">Halogen floodlight → LED floodlight</option>
-                <option value="tv">CRT television → LED television</option>
-                <option value="pc">Desktop PC → laptop</option>
-                <option value="fridge">Refrigerator → 5-star refrigerator</option>
-              </optgroup>
               <optgroup label="Your own">
                 <option value="custom">Custom — enter your own</option>
               </optgroup>
@@ -505,7 +491,7 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
             <label for="custom-name">What are you comparing?
               <span class="hint">Name your own pair</span></label>
             <input type="text" id="custom-name" autocomplete="off" spellcheck="false"
-                   placeholder="e.g. Old water pump → 5-star pump" />
+                   placeholder="e.g. Tube light + choke → LED tube" />
           </div>
         </div>
       </details>
@@ -549,22 +535,22 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
                 <span class="readout" id="lf-new-out">85 %</span></div>
               <input type="range" id="lf-new" min="20" max="100" step="1" value="85" />
               <p class="note">Share of nameplate actually drawn while running. Derate the two
-                units separately: a CRT measures near 50–70% of its plate, an LED monitor sits
-                much closer to its rating, and a laptop's adapter is rated well above what the
-                machine draws. One shared figure distorts the comparison.</p>
+                units separately: a CRT usually runs well below its plate, while an LED monitor
+                sits much closer to its rating. One shared figure distorts the comparison.</p>
             </div>
           </div>
 
           <div class="field" id="amps-field" hidden>
             <label>Current drawn <span class="hint">A — clamp or in-line meter</span></label>
             <div class="pair">
-              <div><input type="number" id="amps-old" min="0" max="30" step="0.01" value="0.74"
+              <div><input type="number" id="amps-old" min="0" max="30" step="0.001" value="0.441"
                           aria-label="Old appliance current in amperes" />
                    <span class="minilabel">Old</span></div>
-              <div><input type="number" id="amps-new" min="0" max="30" step="0.01" value="0.16"
+              <div><input type="number" id="amps-new" min="0" max="30" step="0.001" value="0.136"
                           aria-label="New appliance current in amperes" />
                    <span class="minilabel">New</span></div>
             </div>
+            <p class="warn" id="amps-warn" hidden></p>
           </div>
 
           <div class="field">
@@ -580,92 +566,28 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
             <p class="note" id="pf-note"></p>
             <p class="warn" id="pf-warn" hidden></p>
           </div>
-
-          <div class="field">
-            <label>Standby draw <span class="hint">W — plugged in but not running</span></label>
-            <div class="pair">
-              <div><input type="number" id="sb-old" min="0" max="50" step="0.1" value="3"
-                          aria-label="Old appliance standby power in watts" />
-                   <span class="minilabel">Old</span></div>
-              <div><input type="number" id="sb-new" min="0" max="50" step="0.1" value="0.3"
-                          aria-label="New appliance standby power in watts" />
-                   <span class="minilabel">New</span></div>
-            </div>
-            <p class="note" id="sb-note"></p>
-          </div>
         </div>
       </details>
 
-      <details class="stage">
-        <summary>Conditions <span class="state" id="st-3"></span></summary>
+      <details class="stage" open>
+        <summary>Use &amp; cost <span class="state" id="st-3"></span></summary>
         <div class="stage-body">
           <div class="field">
-            <div class="slider-row"><label for="hrs">Hours connected</label>
+            <div class="slider-row"><label for="hrs">Hours used per day</label>
               <span class="readout" id="hrs-out">6 h/day</span></div>
             <input type="range" id="hrs" min="1" max="24" step="1" value="6" />
           </div>
           <div class="field">
-            <div class="slider-row"><label for="duty">Duty cycle</label>
-              <span class="readout" id="duty-out">100 %</span></div>
-            <input type="range" id="duty" min="5" max="100" step="1" value="100" />
-            <p class="note">Share of connected hours the appliance actually runs. A fridge is
-              connected 24 h but its compressor cycles.</p>
-          </div>
-        </div>
-      </details>
-
-      <details class="stage">
-        <summary>Economics <span class="state" id="st-4"></span></summary>
-        <div class="stage-body">
-          <div class="field">
-            <label for="tariff">Tariff schedule <span class="hint">TANGEDCO — bi-monthly</span></label>
-            <select id="tariff">
-              <optgroup label="Domestic — telescopic slabs">
-                <option value="gross" selected>Gross TNERC regulatory</option>
-                <option value="net">Net payable after TN subsidy</option>
-                <option value="net-b">Net payable — alternate 101–200 band</option>
-              </optgroup>
-              <optgroup label="Institutional — flat rate">
-                <option value="edu-govt">Govt educational / hospital — ₹8.80</option>
-                <option value="edu-priv">Private educational / hostel — ₹9.40</option>
-              </optgroup>
-              <optgroup label="Your own">
-                <option value="custom-rate">Custom flat rate</option>
-              </optgroup>
-            </select>
-          </div>
-          <div class="field" id="units-field">
-            <label for="units">Your bi-monthly consumption
-              <span class="hint">units per 2 months — off your last bill</span></label>
-            <input type="number" id="units" min="0" max="5000" step="10" value="450" />
-            <p class="note" id="slab-note"></p>
-          </div>
-          <div class="field" id="rate-field" hidden>
-            <label for="rate">Your rate
-              <span class="hint">₹/unit — another state, or a later revision</span></label>
+            <label for="rate">Electricity rate
+              <span class="hint">₹ per unit (kWh) — off your own bill</span></label>
             <input type="number" id="rate" min="0" max="100" step="0.01" value="6.65" />
+            <p class="note">One flat rate for every pair. The default is only an example —
+              replace it with the rate on your bill.</p>
           </div>
           <div class="field">
             <label for="cost">Replacement cost
               <span class="hint">₹ — price of the new unit, 0 if unknown</span></label>
             <input type="number" id="cost" min="0" step="100" value="7000" />
-          </div>
-        </div>
-      </details>
-
-      <details class="stage">
-        <summary>Lifecycle <span class="state" id="st-5"></span></summary>
-        <div class="stage-body">
-          <div class="field">
-            <div class="slider-row"><label for="life">Service life of the new unit</label>
-              <span class="readout" id="life-out">8 yr</span></div>
-            <input type="range" id="life" min="1" max="25" step="1" value="8" />
-          </div>
-          <div class="field">
-            <div class="slider-row"><label for="emb">Embodied share of lifecycle energy</label>
-              <span class="readout" id="emb-out">81 %</span></div>
-            <input type="range" id="emb" min="0" max="95" step="1" value="81" />
-            <p class="note" id="emb-note"></p>
           </div>
         </div>
       </details>
@@ -735,18 +657,15 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
         <div class="fig"><dt class="lbl">CO₂ avoided</dt><dd id="m-co2">0<span class="u">kg/yr</span></dd></div>
         <div class="fig"><dt class="lbl">Power cut</dt><dd id="m-pct">0<span class="u">%</span></dd></div>
         <div class="fig"><dt class="lbl">Simple payback</dt><dd id="m-pay">—<span class="u">yr</span></dd></div>
-        <div class="fig"><dt class="lbl">Embodied CO₂ · new</dt><dd id="m-emb">0<span class="u">kg</span></dd></div>
-        <div class="fig"><dt class="lbl">Carbon payback</dt><dd id="m-cpay">—<span class="u">yr</span></dd></div>
       </dl>
 
       <div class="block-head">
         <span class="lbl">Measurements</span>
         <div class="tools">
-          <button type="button" id="btn-add" class="go">+ Add to audit</button>
           <button type="button" id="btn-copy">Copy table</button>
           <button type="button" id="btn-csv">Download CSV</button>
           <button type="button" id="btn-print">Print / PDF</button>
-          <button type="button" id="btn-reset">Reset inputs</button>
+          <button type="button" id="btn-reset">Reset all</button>
         </div>
       </div>
       <div class="table-wrap">
@@ -754,34 +673,28 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
           <thead><tr>
             <th scope="col">Appliance</th><th scope="col">Voltage</th><th scope="col">Current</th>
             <th scope="col">Power factor</th><th scope="col">Apparent power</th>
-            <th scope="col">Real power</th><th scope="col">Standby</th><th scope="col">Energy</th>
+            <th scope="col">Real power</th><th scope="col">Energy</th>
           </tr></thead>
           <tbody>
             <tr class="old"><th scope="row">Old</th>
               <td id="t-old-v"></td><td id="t-old-i"></td><td id="t-old-pf"></td>
-              <td id="t-old-va"></td><td id="t-old-w"></td><td id="t-old-sb"></td>
+              <td id="t-old-va"></td><td id="t-old-w"></td>
               <td id="t-old-e"></td></tr>
             <tr><th scope="row">New</th>
               <td id="t-new-v"></td><td id="t-new-i"></td><td id="t-new-pf"></td>
-              <td id="t-new-va"></td><td id="t-new-w"></td><td id="t-new-sb"></td>
+              <td id="t-new-va"></td><td id="t-new-w"></td>
               <td id="t-new-e"></td></tr>
             <tr class="gain"><th scope="row">Saving</th>
               <td>—</td><td id="t-d-i"></td><td>—</td>
-              <td id="t-d-va"></td><td id="t-d-w"></td><td id="t-d-sb"></td>
+              <td id="t-d-va"></td><td id="t-d-w"></td>
               <td id="t-d-e"></td></tr>
           </tbody>
         </table>
       </div>
 
       <div class="block-head">
-        <span class="lbl" id="chart-title">Cumulative cost — where replacing overtakes keeping</span>
-        <div class="tools">
-          <span class="lbl" id="chart-note"></span>
-          <div class="seg" id="mode-seg" role="group" aria-label="Chart measure">
-            <button type="button" data-mode="money" aria-pressed="true">Money</button>
-            <button type="button" data-mode="carbon" aria-pressed="false">Carbon</button>
-          </div>
-        </div>
+        <span class="lbl">Cumulative cost — where replacing overtakes keeping</span>
+        <span class="lbl" id="chart-note"></span>
       </div>
       <div class="legend">
         <span><i style="background:var(--old)"></i>Keep the old unit</span>
@@ -811,36 +724,12 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
       <div class="table-wrap">
         <table class="t ov">
           <thead><tr>
-            <th scope="col">Appliance pair</th><th scope="col">Power</th>
+            <th scope="col">Appliance pair</th><th scope="col">Basis</th><th scope="col">Power</th>
             <th scope="col">Energy saved</th><th scope="col">Relative</th>
             <th scope="col">Cost saved</th><th scope="col">CO₂ avoided</th>
-            <th scope="col">Carbon payback</th><th scope="col">Verdict</th>
+            <th scope="col">Payback</th>
           </tr></thead>
           <tbody id="ov-body"></tbody>
-        </table>
-      </div>
-
-      <div class="block-head">
-        <span class="lbl">Audit summary <span id="count"></span></span>
-        <div class="tools" id="summary-exports" hidden>
-          <button type="button" id="btn-copy-sum">Copy summary</button>
-          <button type="button" id="btn-clear">Clear all</button>
-        </div>
-      </div>
-      <p class="empty" id="summary-empty">
-        Nothing added yet. Work through a pair, then press <b>+ Add to audit</b> to bank it.
-        Repeat for the three project comparisons — CRT monitor, CFL lamp, induction fan —
-        and this table totals the savings across all of them.</p>
-      <div class="table-wrap" id="summary-wrap" hidden>
-        <table class="t stable">
-          <thead><tr>
-            <th scope="col">Appliance pair</th><th scope="col">Basis</th><th scope="col">Old</th>
-            <th scope="col">New</th><th scope="col">Energy saved</th><th scope="col">Cost saved</th>
-            <th scope="col">CO₂ avoided</th><th scope="col">Payback</th>
-            <th scope="col">Embodied CO₂</th><th scope="col">Carbon payback</th>
-            <th scope="col"><span class="sr-only">Remove</span></th>
-          </tr></thead>
-          <tbody id="summary-body"></tbody>
         </table>
       </div>
 
@@ -853,42 +742,27 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
       <div><b>S</b><i>= V × I</i><u>apparent power, VA</u></div>
       <div><b>P</b><i>= V × I × cos φ</i><u>real power, measured</u></div>
       <div><b>P</b><i>= rated W × load factor</i><u>real power, nameplate</u></div>
-      <div><b>E</b><i>= (P × h<sub>run</sub> + P<sub>sb</sub> × h<sub>idle</sub>) × 365 ÷ 1000</i><u>kWh per year</u></div>
-      <div><b>h<sub>run</sub></b><i>= h/day × duty &nbsp;·&nbsp; h<sub>idle</sub> = 24 − h<sub>run</sub></i><u>hours per day</u></div>
+      <div><b>E</b><i>= P × hours per day × 365 ÷ 1000</i><u>kWh per year</u></div>
       <div><b>Saving</b><i>= E<sub>old</sub> − E<sub>new</sub></i><u>kWh per year</u></div>
-      <div><b>Cost</b><i>= bill(units) − bill(units − saving ÷ 6)</i><u>₹ per cycle, telescopic</u></div>
+      <div><b>Cost saving</b><i>= Saving × rate</i><u>₹ per year</u></div>
       <div><b>CO₂</b><i>= Saving × 0.710</i><u>kg per year</u></div>
-      <div><b>Payback</b><i>= cost ÷ annual saving</i><u>years, undiscounted</u></div>
-      <div><b>Embodied</b><i>= E<sub>new</sub> × life × 0.710 × s ÷ (1 − s)</i><u>kg CO₂, s = embodied share</u></div>
-      <div><b>Carbon payback</b><i>= Embodied ÷ CO₂ avoided</i><u>years</u></div>
+      <div><b>Payback</b><i>= replacement cost ÷ cost saving</i><u>years, undiscounted</u></div>
     </div>
 
     <span class="lbl">Data &amp; references</span>
     <dl class="sources">
       <div><dt class="lbl">Emission factor</dt>
-        <dd>0.710 kg CO₂/kWh — CEA CO₂ Baseline Database v21.0, FY 2024-25. National grid, not Tamil Nadu.</dd></div>
-      <div><dt class="lbl">Tariff — gross (₹/unit)</dt>
-        <dd>0–400: 4.95 · 401–500: 6.65 · 501–600: 8.80 · 601–800: 9.95 · 801–1000: 11.05 · above 1000: 12.15. Slabs are <b>bi-monthly</b>.</dd></div>
-      <div><dt class="lbl">Tariff model</dt>
-        <dd>Billing is <b>telescopic</b>: each band is charged at its own rate, so a saving is worth the rate at the <b>top</b> of your consumption, not a blended average. The bench prices it as bill(units) − bill(units − saving), which stays correct when a saving straddles a band. Above 500 units the subsidised schedule falls back to the gross bands.</dd></div>
-      <div><dt class="lbl">Tariff — net after TN subsidy</dt>
-        <dd>0–100: free · 101–200: 2.35 or 2.60 · 201–400: 4.70 · 401–500: 6.30. Above 500 the subsidy tapers out.</dd></div>
-      <div><dt class="lbl">Tariff — institutional</dt>
-        <dd>Govt educational/hospital 8.80 · private educational/hostel 9.40. TANGEDCO LT-IA and LT-IIB, TNERC suo motu CPI order effective 1 July 2025.</dd></div>
+        <dd>0.710 kg CO₂/kWh — CEA CO₂ Baseline Database v21.0, FY 2024-25. National grid average, not Tamil Nadu alone.</dd></div>
+      <div><dt class="lbl">Electricity rate</dt>
+        <dd>One flat ₹ per unit, entered by you. Slab tariffs charge each band at its own rate, so use the rate of the highest band your bill reaches — that is what a saved unit is worth.</dd></div>
       <div><dt class="lbl">Load factor</dt>
-        <dd>Nameplate is an upper bound, and the two units derate differently. A 19-inch CRT rated 120 W measures about 50 W in use, hence 50–70% for displays; an LED monitor sits closer to its rating, and a laptop's adapter is rated well above what the machine draws. Preset pairs are typical values — measure and overwrite them.</dd></div>
-      <div><dt class="lbl">Standby</dt>
-        <dd>Counted over the hours the unit is idle but still plugged in, i.e. 24 − (hours connected × duty). Preset values are typical, not readings; enter 0 if the appliance is switched off at the socket. A CRT at 3 W for 18 h/day is about 20 kWh a year.</dd></div>
-      <div><dt class="lbl">Embodied share</dt>
-        <dd>Embodied carbon is derived from the new unit's own operating figures as operating × s/(1−s). <b>81%</b> for computers and CRT displays is Williams (2004); <b>18%</b> for lighting is the complement of the ~82% use-phase share quoted for CFLs. The <b>12%</b> used for motors and <b>20%</b> for custom pairs are <b>assumptions, not citations</b> — replace them with a manufacturer or LCA figure.</dd></div>
+        <dd>Nameplate is an upper bound, and the two units derate differently. The preset wattages, load factors and power factors are <b>typical values, not readings</b> — measure and overwrite them.</dd></div>
       <div><dt class="lbl">Lamp equivalence</dt>
-        <dd>At ~800 lm: 60 W incandescent ≈ 14 W CFL ≈ 9 W LED (ENERGY STAR). Unmatched wattages overstate the saving.</dd></div>
+        <dd>At ~800 lm: 14 W CFL ≈ 9 W LED (ENERGY STAR). Unmatched wattages overstate the saving.</dd></div>
       <div><dt class="lbl">Method</dt>
-        <dd>ISO 50002 Level 1–2, IS 13979. Table cells are labelled measured, derived or typical. Payback is simple and undiscounted. Inputs and banked pairs are stored in this browser only — nothing is uploaded. Append <b>?selftest</b> to the URL to run the built-in arithmetic checks in the console.</dd></div>
-      <div><dt class="lbl">References</dt>
-        <dd>Williams (2004) <em>Environ. Sci. Technol.</em> 38(22) — 81% of a computer's lifetime energy is embodied. Kim, Keoleian &amp; Horie (2006) <em>Energy Policy</em> 34(15). Bhakar et al. (2015) <em>Procedia CIRP</em> 29.</dd></div>
+        <dd>Every table cell is labelled <b>measured</b>, <b>derived</b>, <b>typical</b> or <b>calculated</b>. Payback is simple and undiscounted. Inputs are stored in this browser only — nothing is uploaded.</dd></div>
       <div><dt class="lbl">Disposal</dt>
-        <dd>CRT glass 1.8–3.6 kg lead; CFLs contain mercury. CPCB-authorised recycler, E-Waste (Management) Rules 2022.</dd></div>
+        <dd>A CRT holds roughly 2–4 kg of lead in its glass; CFLs contain mercury. Hand replaced units to a CPCB-registered recycler under the E-Waste (Management) Rules, 2022 — not to household waste.</dd></div>
     </dl>
   </section>
 
@@ -954,6 +828,11 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
     v + '<small>' + u + '</small><em class="' + prov + '">' + prov + '</em>';
   const esc = s => String(s).replace(/[&<>"]/g, c =>
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const yrs = v => v === null ? '—' : v > 99 ? '99+' : v.toFixed(1) + '<small>yr</small>';
+  const today = () => {
+    const d = new Date(), p = n => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+  };
 
   const basis = el('basis'), preset = el('preset'),
         customField = el('custom-field'), customName = el('custom-name'),
@@ -961,121 +840,90 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
         lfOld = el('lf-old'), lfNew = el('lf-new'),
         volts = el('volts'), ampsOld = el('amps-old'), ampsNew = el('amps-new'),
         pfOld = el('pf-old'), pfNew = el('pf-new'),
-        sbOld = el('sb-old'), sbNew = el('sb-new'),
-        hrs = el('hrs'), duty = el('duty'), tariff = el('tariff'),
-        units = el('units'), rate = el('rate'), cost = el('cost'),
-        life = el('life'), emb = el('emb');
+        hrs = el('hrs'), rate = el('rate'), cost = el('cost');
 
   // Which figures the student actually entered, versus the preset's typical
   // values. Every table cell is labelled so a printed sheet never passes an
   // assumption off as a reading.
-  const touched = {volts:false, ampsOld:false, ampsNew:false, pfOld:false, pfNew:false,
-                   sbOld:false, sbNew:false};
+  const touched = {volts:false, ampsOld:false, ampsNew:false, pfOld:false, pfNew:false};
 
   const PRESETS = {
-    crt:          {wOld:110, wNew:22, lfOld:60,  lfNew:85,  sbOld:3,  sbNew:.3, pfOld:.65, pfNew:.60, h:6,  duty:100, cost:7000,  life:8,  emb:81, cat:'display'},
-    cfl:          {wOld:14,  wNew:9,  lfOld:100, lfNew:100, sbOld:0,  sbNew:0,  pfOld:.55, pfNew:.90, h:5,  duty:100, cost:120,   life:10, emb:18, cat:'lighting'},
-    fan:          {wOld:75,  wNew:30, lfOld:95,  lfNew:95,  sbOld:0,  sbNew:1,  pfOld:.85, pfNew:.95, h:12, duty:100, cost:3200,  life:12, emb:12, cat:'motor'},
-    incandescent: {wOld:60,  wNew:9,  lfOld:100, lfNew:100, sbOld:0,  sbNew:0,  pfOld:1,   pfNew:.90, h:6,  duty:100, cost:120,   life:10, emb:18, cat:'lighting'},
-    tube:         {wOld:55,  wNew:20, lfOld:100, lfNew:95,  sbOld:0,  sbNew:0,  pfOld:.50, pfNew:.90, h:8,  duty:100, cost:350,   life:10, emb:18, cat:'lighting'},
-    halogen:      {wOld:150, wNew:30, lfOld:100, lfNew:95,  sbOld:0,  sbNew:0,  pfOld:1,   pfNew:.90, h:6,  duty:100, cost:900,   life:10, emb:18, cat:'lighting'},
-    tv:           {wOld:120, wNew:55, lfOld:65,  lfNew:75,  sbOld:5,  sbNew:.5, pfOld:.65, pfNew:.60, h:5,  duty:100, cost:22000, life:8,  emb:81, cat:'display'},
-    pc:           {wOld:200, wNew:45, lfOld:55,  lfNew:45,  sbOld:3,  sbNew:.5, pfOld:.70, pfNew:.60, h:6,  duty:100, cost:45000, life:6,  emb:81, cat:'display'},
-    fridge:       {wOld:180, wNew:90, lfOld:85,  lfNew:85,  sbOld:0,  sbNew:0,  pfOld:.80, pfNew:.90, h:24, duty:40,  cost:28000, life:12, emb:12, cat:'motor'},
-    custom:       {wOld:60,  wNew:20, lfOld:100, lfNew:100, sbOld:0,  sbNew:0,  pfOld:.90, pfNew:.90, h:6,  duty:100, cost:0,     life:10, emb:20, cat:'custom'}
+    crt:    {wOld:110, wNew:22, lfOld:60,  lfNew:85,  pfOld:.65, pfNew:.60, h:6,  cost:7000, cat:'display'},
+    cfl:    {wOld:14,  wNew:9,  lfOld:100, lfNew:100, pfOld:.55, pfNew:.90, h:5,  cost:120,  cat:'lighting'},
+    fan:    {wOld:75,  wNew:30, lfOld:95,  lfNew:95,  pfOld:.85, pfNew:.95, h:12, cost:3200, cat:'motor'},
+    custom: {wOld:60,  wNew:20, lfOld:100, lfNew:100, pfOld:.90, pfNew:.90, h:6,  cost:0,    cat:'custom'}
   };
+  const OV = ['crt', 'cfl', 'fan'];      // the three comparisons the project names
 
-  /* ---------- tariff: TANGEDCO bills telescopically ----------
-     The old model asked which slab you were in and multiplied. Real domestic
-     billing charges each band at its own rate, so the money a saving is worth
-     is the rate at the TOP of your consumption, not a blended average. Caps
-     are cumulative units per two-month cycle; the last band runs to infinity.
-     Figures are the ones already documented in the footer. */
-  const GROSS_TAIL = [[600, 8.80], [800, 9.95], [1000, 11.05], [Infinity, 12.15]];
-  const SCHEDULES = {
-    gross:  {label:'Domestic gross — TNERC regulatory',
-             slabs:[[400, 4.95], [500, 6.65]].concat(GROSS_TAIL)},
-    net:    {label:'Domestic net — after TN subsidy',
-             slabs:[[100, 0], [200, 2.35], [400, 4.70], [500, 6.30]].concat(GROSS_TAIL)},
-    'net-b':{label:'Domestic net — alternate 101–200 band',
-             slabs:[[100, 0], [200, 2.60], [400, 4.70], [500, 6.30]].concat(GROSS_TAIL)},
-    'edu-govt':   {label:'Govt educational / hospital', flat:8.80},
-    'edu-priv':   {label:'Private educational / hostel', flat:9.40},
-    'custom-rate':{label:'Custom flat rate', flat:null}
-  };
-  function billFor(u, slabs){
-    let prev = 0, total = 0;
-    for (const [cap, r] of slabs){
-      if (u <= prev) break;
-      total += (Math.min(u, cap) - prev) * r;
-      prev = cap;
-    }
-    return total;
-  }
-  function marginalRate(u, slabs){
-    for (const [cap, r] of slabs) if (u <= cap) return r;
-    return slabs[slabs.length - 1][1];
-  }
-  // What one saved unit is actually worth: the bill with the load, minus the
-  // bill without it, spread over the units removed. Straddling a slab
-  // boundary is handled for free.
-  function effectiveRate(u, saved, slabs){
-    if (!(saved > 0) || !(u > 0)) return marginalRate(u, slabs);
-    const after = Math.max(0, u - saved);
-    return (billFor(u, slabs) - billFor(after, slabs)) / (u - after);
-  }
-  let category = PRESETS.crt.cat;
-  let activePf = {old:PRESETS.crt.pfOld, neu:PRESETS.crt.pfNew};
-  let last = null;
-  const audit = [];
-  let justAdded = -1;
+  /* ---------- per-pair state ----------
+     Each pair keeps its own readings, so moving from the CRT to the fan and
+     back does not wipe what was measured, and the three-pair table can total
+     the student's own figures instead of the presets. */
+  const PAIR_FIELDS = ['basis','oldw','neww','lf-old','lf-new','amps-old','amps-new',
+                       'pf-old','pf-new','hrs','cost'];
+  const PAIR_TOUCH = ['ampsOld','ampsNew','pfOld','pfNew'];
+  const pairs = {};                      // key -> {f:{field id: value}, t:{touched flags}}
+  let current = 'crt';
+  let last = null, lastOv = null;
 
-  const DISPOSAL = {
-    display:  ' At genuine end of life route it to a CPCB-authorised recycler — CRT glass carries 1.8–3.6 kg of lead.',
-    lighting: ' Discarded CFLs contain mercury and must go to an authorised recycler, not household waste.',
-    motor:    ' Scrap motors and compressors through a CPCB-authorised recycler; refrigerant must be recovered, not vented.',
-    custom:   ' Route the replaced unit to a CPCB-authorised recycler under the E-Waste (Management) Rules, 2022.'
-  };
-  // The carbon test outranks the money test. A replacement that never earns
-  // back the emissions of building it is the wrong call however fast it pays
-  // for itself in rupees — which is the whole point of an e-waste audit.
-  function verdictFor(v){
-    const bin = DISPOSAL[v.cat] || DISPOSAL.custom;
-    if (v.kwh <= 0) return {cls:'', tag:'No saving',
-      text:'The replacement draws as much as or more than the original at these settings. Check the readings, the load factors, the standby draw and the duty cycle before going further.'};
-    const pay = v.payback === null
-      ? 'Enter the replacement cost to see whether it pays back in money too.'
-      : v.payback <= 2 ? 'In money it pays for itself in ' + v.payback.toFixed(1) + ' years, well inside its service life.'
-      : v.payback <= v.life ? 'In money it pays for itself in ' + v.payback.toFixed(1) + ' years, inside the ' + v.life + '-year service life you set.'
-      : 'In money it takes ' + v.payback.toFixed(1) + ' years, which is longer than the ' + v.life + '-year service life you set.';
-
-    if (v.cPay !== null && v.cPay > v.life) return {cls:'retain', tag:'Retain — the carbon never pays back',
-      text:'Building the replacement costs about ' + Math.round(v.embKg).toLocaleString('en-IN')
-        + ' kg CO₂. At ' + Math.round(v.co2).toLocaleString('en-IN') + ' kg avoided per year it would need '
-        + v.cPay.toFixed(1) + ' years to earn that back — longer than the ' + v.life
-        + '-year service life you set. Scrapping a unit that still works loses more carbon than it saves: keep it running.' + bin};
-    return {cls:'replace', tag:'Replace — carbon pays back in ' + v.cPay.toFixed(1) + ' yr',
-      text:'The replacement earns back the ' + Math.round(v.embKg).toLocaleString('en-IN')
-        + ' kg CO₂ of building it in ' + v.cPay.toFixed(1) + ' years, inside its ' + v.life
-        + '-year service life, so the swap is a net carbon gain. ' + pay + bin};
+  function defaultFields(k, V){
+    const p = PRESETS[k];
+    return {basis:'rated', oldw:p.wOld, neww:p.wNew, 'lf-old':p.lfOld, 'lf-new':p.lfNew,
+      'amps-old':(p.wOld * p.lfOld / 100 / (V * p.pfOld)).toFixed(3),
+      'amps-new':(p.wNew * p.lfNew / 100 / (V * p.pfNew)).toFixed(3),
+      'pf-old':p.pfOld.toFixed(2), 'pf-new':p.pfNew.toFixed(2), hrs:p.h, cost:p.cost};
+  }
+  function load(f){
+    PAIR_FIELDS.forEach(id => { if (f[id] !== undefined) el(id).value = f[id]; });
+    basis.value = f.basis === 'measured' ? 'measured' : 'rated';
+  }
+  function stash(){
+    const f = {}, t = {};
+    PAIR_FIELDS.forEach(id => { f[id] = el(id).value; });
+    PAIR_TOUCH.forEach(k => { t[k] = touched[k]; });
+    pairs[current] = {f, t};
   }
 
   // A blank field must not silently become a flattering number: unity power
-  // factor and 230 V both inflate the result.
+  // factor, 230 V and 0 A all inflate the result.
   const validPf = raw => {
     const v = parseFloat(raw);
     return (isFinite(v) && v > 0 && v <= 1) ? v : null;
   };
-
-  // Screen readers hear the outcome, not every pixel of a slider drag.
-  let liveTimer;
-  const announce = msg => {
-    clearTimeout(liveTimer);
-    liveTimer = setTimeout(() => { el('live').textContent = msg; }, 700);
+  const validAmps = raw => {
+    const v = parseFloat(raw);
+    return (isFinite(v) && v > 0) ? v : null;
   };
+  function readV(){
+    const v = parseFloat(volts.value);
+    const ok = isFinite(v) && v >= 80 && v <= 270;
+    return {V: ok ? v : 230, ok};
+  }
+  const readRate = () => Math.max(0, parseFloat(rate.value) || 0);
 
-  /* ---------- the rig: a schematic that is also the chart ---------- */
-  function model(i){
+  // One pair's fields -> validated inputs for model(). Used for the pair on
+  // the bench and for every row of the three-pair table, so they cannot drift.
+  function readPair(k, f, V){
+    const p = PRESETS[k];
+    const num = (id, lo, hi, dflt) => {
+      const v = parseFloat(f[id]);
+      return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : dflt;
+    };
+    const measured = f.basis === 'measured';
+    const pO = validPf(f['pf-old']), pN = validPf(f['pf-new']);
+    const kOld = pO === null ? p.pfOld : pO, kNew = pN === null ? p.pfNew : pN;
+    const ratedOld = num('oldw', 1, 250, p.wOld), ratedNew = num('neww', 1, 250, p.wNew);
+    const lfO = num('lf-old', 20, 100, p.lfOld) / 100, lfN = num('lf-new', 20, 100, p.lfNew) / 100;
+    const aO = validAmps(f['amps-old']), aN = validAmps(f['amps-new']);
+    return {measured, V, kOld, kNew, ratedOld, ratedNew, lfO, lfN,
+      // a missing reading falls back to the nameplate estimate, never to 0 A
+      aOld: aO === null ? ratedOld * lfO / (V * kOld) : aO,
+      aNew: aN === null ? ratedNew * lfN / (V * kNew) : aN,
+      h: num('hrs', 1, 24, p.h), c: Math.max(0, parseFloat(f.cost) || 0),
+      okPO: pO !== null, okPN: pN !== null, okAO: aO !== null, okAN: aN !== null};
+  }
+
+  function model(i, tariff){
     let iOld, iNew, wOld, wNew;
     if (i.measured){
       iOld = i.aOld; iNew = i.aNew;
@@ -1084,22 +932,40 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
       wOld = i.ratedOld * i.lfO; wNew = i.ratedNew * i.lfN;
       iOld = wOld / (i.V * i.kOld); iNew = wNew / (i.V * i.kNew);
     }
-    const runH = i.h * i.d * 365, idleH = Math.max(0, 24 - i.h * i.d) * 365;
-    const eSbOld = i.sO * idleH / 1000, eSbNew = i.sN * idleH / 1000;
-    const eOld = wOld * runH / 1000 + eSbOld, eNew = wNew * runH / 1000 + eSbNew;
-    const kwh = Math.max(0, eOld - eNew), co2 = kwh * EF;
-    const cycleSaved = kwh / 6;
-    const t = i.isCustom ? i.customRate
-            : i.sched.flat !== undefined ? i.sched.flat
-            : effectiveRate(i.cycleUnits, cycleSaved, i.sched.slabs);
-    const saving = kwh * t;
+    const hours = i.h * 365;
+    const eOld = wOld * hours / 1000, eNew = wNew * hours / 1000;
+    const kwh = Math.max(0, eOld - eNew), co2 = kwh * EF, saving = kwh * tariff;
     const payback = (i.c > 0 && saving > 0) ? i.c / saving : null;
-    const embShare = Math.min(.95, Math.max(0, i.embShare));
-    const embKg = eNew * i.lifeY * EF * (embShare / (1 - embShare));
     return {wOld, wNew, iOld, iNew, vaOld:i.V * iOld, vaNew:i.V * iNew,
-            runH, idleH, eSbOld, eSbNew, eOld, eNew, kwh, co2, cycleSaved,
-            t, saving, payback, embShare, embKg, cPay: co2 > 0 ? embKg / co2 : null};
+            hours, eOld, eNew, kwh, co2, saving, payback};
   }
+
+  const DISPOSAL = {
+    display:  ' Do not bin the old monitor: CRT glass holds roughly 2–4 kg of lead, so it must go to a CPCB-registered e-waste recycler.',
+    lighting: ' Do not bin the old lamp: CFLs contain mercury and must go to a registered e-waste recycler, not household waste.',
+    motor:    ' Hand the old fan to a registered e-waste recycler so its copper windings and steel are recovered.',
+    custom:   ' Hand the replaced unit to a CPCB-registered recycler under the E-Waste (Management) Rules, 2022.'
+  };
+  function verdictFor(v){
+    if (v.kwh <= 0) return {cls:'', tag:'No saving',
+      text:'The replacement draws as much as or more than the original at these settings. Check the readings, the load factors and the hours of use before going further.'};
+    const pay = v.payback === null
+      ? (v.c > 0 ? 'Enter your electricity rate to see when it pays for itself.'
+                 : 'Enter the replacement cost to see when it pays for itself.')
+      : v.payback > 99 ? 'At ' + inr(v.c) + ' it would take more than 99 years to pay for itself.'
+      : 'At ' + inr(v.c) + ' it pays for itself in ' + v.payback.toFixed(1) + ' years.';
+    return {cls:'replace', tag:'Replacing saves ' + Math.round(v.kwh).toLocaleString('en-IN') + ' kWh a year',
+      text:'The replacement uses ' + Math.round(v.kwh / v.eOld * 100) + '% less energy for the same hours of use, which avoids about '
+        + Math.round(v.co2).toLocaleString('en-IN') + ' kg of CO₂ a year at the Indian grid average. '
+        + pay + (DISPOSAL[v.cat] || DISPOSAL.custom)};
+  }
+
+  // Screen readers hear the outcome, not every pixel of a slider drag.
+  let liveTimer;
+  const announce = msg => {
+    clearTimeout(liveTimer);
+    liveTimer = setTimeout(() => { el('live').textContent = msg; }, 700);
+  };
 
   const THEME_KEY = 'energy-audit-theme';
   const sysDark = window.matchMedia('(prefers-color-scheme: dark)');
@@ -1125,6 +991,7 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
   sysDark.addEventListener('change', () => { if (themePref() === 'auto') paintTheme(); });
   paintTheme();
 
+  /* ---------- the rig: a schematic that is also the chart ---------- */
   const RIG = {x:222, max:740};
   function drawRig(wOld, wNew, iOld, iNew, V){
     const peak = Math.max(wOld, wNew, 1);
@@ -1132,7 +999,7 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
     el('rig-supply').textContent = 'SUPPLY  ' + Math.round(V) + ' V ∼';
     [['old', wo, wOld, iOld], ['new', wn, wNew, iNew]].forEach(([k, w, p, i]) => {
       el('bar-' + k).setAttribute('width', w);
-      meter(el('i-' + k), i, v => v.toFixed(2) + ' A');
+      meter(el('i-' + k), i, v => v.toFixed(3) + ' A');
       const t = el('bar-' + k + '-val');
       meter(t, p, v => v.toFixed(1) + ' W');
       // the label rides inside the block, or steps outside when it will not fit
@@ -1163,29 +1030,8 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
   /* ---------- payback crossover ---------- */
   const C = {w:1000, h:330, l:78, r:96, t:16, b:44};
   const kfmt = v => v >= 1000 ? Math.round(v / 100) / 10 + 'k' : String(Math.round(v));
-  const MODES = {
-    money: {
-      title:'Cumulative cost — where replacing overtakes keeping',
-      axis:v => '₹' + kfmt(v),
-      tip:v => inr(v),
-      cross:'PAYS BACK ',
-      empty:'Add a replacement cost to see the crossover',
-      none:'No saving — the lines never meet'
-    },
-    carbon: {
-      title:'Cumulative CO₂ — where the replacement earns back its manufacture',
-      axis:v => kfmt(v) + ' kg',
-      tip:v => Math.round(v).toLocaleString('en-IN') + ' kg',
-      cross:'CARBON PAYBACK ',
-      empty:'Set an embodied share above zero to see the crossover',
-      none:'No CO₂ saving — the lines never meet'
-    }
-  };
-  let chartMode = 'money';
   let chartState = null, firstChart = true;
   function drawChart(annualOld, annualNew, capex){
-    const M = MODES[chartMode];
-    el('chart-title').textContent = M.title;
     const svg = el('chart');
     while (svg.childNodes.length > 1) svg.removeChild(svg.lastChild);   // keep <title>
     const mk = (tag, at) => { const n = document.createElementNS(NS, tag);
@@ -1194,7 +1040,7 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
     const save  = annualOld - annualNew;
     const pay   = (capex > 0 && save > 0) ? capex / save : null;
     const years = Math.max(5, Math.min(30, Math.ceil((pay || 6) * 1.9)));
-    const yMax  = Math.max(annualOld * years, capex + annualNew * years, 1);
+    const yMax  = Math.max(annualOld * years, capex + annualNew * years, 10);
     const px = t => C.l + t / years * (C.w - C.l - C.r);
     const py = v => C.h - C.b - v / yMax * (C.h - C.b - C.t);
 
@@ -1203,7 +1049,7 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
     for (let v = 0; v <= yMax; v += gs){
       svg.appendChild(mk('line', {class:'grid', x1:C.l, y1:py(v), x2:C.w - C.r, y2:py(v)}));
       const lb = mk('text', {x:C.l - 10, y:py(v) + 4, 'text-anchor':'end'});
-      lb.textContent = M.axis(v);
+      lb.textContent = '₹' + kfmt(v);
       svg.appendChild(lb);
     }
     svg.appendChild(mk('line', {class:'axis', x1:C.l, y1:C.h - C.b, x2:C.w - C.r, y2:C.h - C.b}));
@@ -1243,7 +1089,7 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
       svg.appendChild(mk('circle', {class:'dot' + mark, cx:cx, cy:cy, r:6, fill:'var(--new)'}));
       const t = mk('text', {class:'crosslab' + mark, x:cx, y:cy - 20,
         'text-anchor':cx > C.w * .72 ? 'end' : 'middle'});
-      t.textContent = M.cross + pay.toFixed(1) + ' YR';
+      t.textContent = 'PAYS BACK ' + pay.toFixed(1) + ' YR';
       svg.appendChild(t);
     }
 
@@ -1254,9 +1100,10 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
     svg.appendChild(mk('rect', {x:C.l, y:C.t, width:C.w - C.l - C.r, height:C.h - C.b - C.t,
       fill:'transparent', style:'cursor:crosshair'}));
 
-    chartState = {annualOld, annualNew, capex, years, px, py, hair, d1, d2, tip:M.tip};
+    chartState = {annualOld, annualNew, capex, years, px, py, hair, d1, d2};
     el('chart-note').textContent = pay === null
-      ? (capex <= 0 ? M.empty : M.none)
+      ? (capex <= 0 ? 'Add a replacement cost to see the crossover'
+                    : 'No cost saving — the lines never meet')
       : pay > years ? 'Crossover beyond ' + years + ' years' : '';
     firstChart = false;
   }
@@ -1279,7 +1126,7 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
     s.d2.setAttribute('cx', s.px(t)); s.d2.setAttribute('cy', s.py(vn)); s.d2.setAttribute('opacity', 1);
     const tip = el('tip');
     tip.innerHTML = '<b>Year ' + t.toFixed(1) + '</b><br><span class="o">Keep</span> '
-      + s.tip(vo) + '<br><span class="n">Replace</span> ' + s.tip(vn);
+      + inr(vo) + '<br><span class="n">Replace</span> ' + inr(vn);
     // Placed against the wrapper, not the drawing: on a narrow screen the
     // drawing scrolls inside the wrapper and a percentage would drift.
     const wr = el('tip').parentNode.getBoundingClientRect();
@@ -1293,23 +1140,28 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
 
   /* ---------- main ---------- */
   function calc(){
-    const measured = basis.value === 'measured';
-    const h = +hrs.value, d = +duty.value / 100, c = Math.max(0, +cost.value || 0);
-
-    const vRaw = parseFloat(volts.value);
-    const vOk = isFinite(vRaw) && vRaw >= 80 && vRaw <= 270;
-    const V = vOk ? vRaw : 230;
+    const {V, ok:vOk} = readV();
     el('volts-warn').hidden = vOk;
     if (!vOk) el('volts-warn').textContent =
       'Blank or outside 80–270 V — calculating at 230 V. Enter your measured supply voltage.';
 
-    const rawOld = validPf(pfOld.value), rawNew = validPf(pfNew.value);
-    const kOld = rawOld === null ? activePf.old : rawOld;
-    const kNew = rawNew === null ? activePf.neu : rawNew;
-    const pfMissing = rawOld === null || rawNew === null;
+    stash();
+    const I = readPair(current, pairs[current].f, V);
+    const tariff = readRate();
+    const M = model(I, tariff);
+    const measured = I.measured, h = I.h, c = I.c, kOld = I.kOld, kNew = I.kNew;
+    const wOld = M.wOld, wNew = M.wNew, iOld = M.iOld, iNew = M.iNew;
+    const vaOld = M.vaOld, vaNew = M.vaNew, eOld = M.eOld, eNew = M.eNew;
+    const kwh = M.kwh, co2 = M.co2, saving = M.saving, payback = M.payback;
+
+    const pfMissing = !I.okPO || !I.okPN;
     el('pf-warn').hidden = !pfMissing;
     if (pfMissing) el('pf-warn').textContent =
       'Blank or outside 0–1 — using the typical value for this appliance, not 1.00.';
+    const ampsMissing = measured && (!I.okAO || !I.okAN);
+    el('amps-warn').hidden = !ampsMissing;
+    if (ampsMissing) el('amps-warn').textContent =
+      'Blank or zero — using the nameplate estimate for that appliance, not 0 A. Enter your reading.';
 
     el('rated-inputs').hidden = measured;
     el('amps-field').hidden = !measured;
@@ -1320,58 +1172,24 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
       ? 'Both factors entered by you — the table reports them as measured.'
       : 'Preset factors are typical for the appliance type, not readings. Overwrite them with wattmeter values and the table will say so.';
 
-    const lfO = +lfOld.value / 100, lfN = +lfNew.value / 100;
-    const sO = Math.max(0, +sbOld.value || 0), sN = Math.max(0, +sbNew.value || 0);
-    const sched = SCHEDULES[tariff.value] || SCHEDULES.gross;
-    const isFlat = sched.flat !== undefined;
-    const isCustom = tariff.value === 'custom-rate';
-    const cycleUnits = Math.max(0, +units.value || 0);
-    const lifeY = +life.value;
-    const M = model({
-      measured, V, kOld, kNew,
-      aOld:Math.max(0, +ampsOld.value || 0), aNew:Math.max(0, +ampsNew.value || 0),
-      ratedOld:+oldw.value, ratedNew:+neww.value, lfO, lfN, sO, sN, h, d,
-      sched, isCustom, customRate:Math.max(0, parseFloat(rate.value) || 0),
-      cycleUnits, c, lifeY, embShare:+emb.value / 100
-    });
-    const wOld = M.wOld, wNew = M.wNew, iOld = M.iOld, iNew = M.iNew;
-    const vaOld = M.vaOld, vaNew = M.vaNew, runH = M.runH;
-    const eSbOld = M.eSbOld, eSbNew = M.eSbNew, eOld = M.eOld, eNew = M.eNew;
-    const kwh = M.kwh, co2 = M.co2, cycleSaved = M.cycleSaved, t = M.t;
-    const saving = M.saving, payback = M.payback;
-    const embShare = M.embShare, embKg = M.embKg, cPay = M.cPay;
+    const provV  = (touched.volts && vOk) ? 'measured' : 'typical';
+    const provIO = measured ? ((touched.ampsOld && I.okAO) ? 'measured' : 'typical') : 'derived';
+    const provIN = measured ? ((touched.ampsNew && I.okAN) ? 'measured' : 'typical') : 'derived';
+    const provPO = (touched.pfOld && I.okPO) ? 'measured' : 'typical';
+    const provPN = (touched.pfNew && I.okPN) ? 'measured' : 'typical';
 
-    const provV  = (touched.volts && vOk) ? 'measured' : 'assumed';
-    const provIO = measured ? (touched.ampsOld ? 'measured' : 'seeded') : 'derived';
-    const provIN = measured ? (touched.ampsNew ? 'measured' : 'seeded') : 'derived';
-    const provPO = (touched.pfOld && rawOld !== null) ? 'measured' : 'typical';
-    const provPN = (touched.pfNew && rawNew !== null) ? 'measured' : 'typical';
-    const provSO = touched.sbOld ? 'measured' : 'typical';
-    const provSN = touched.sbNew ? 'measured' : 'typical';
+    el('oldw-out').textContent   = I.ratedOld + ' W';
+    el('neww-out').textContent   = I.ratedNew + ' W';
+    el('lf-old-out').textContent = Math.round(I.lfO * 100) + ' %';
+    el('lf-new-out').textContent = Math.round(I.lfN * 100) + ' %';
+    el('hrs-out').textContent    = h + ' h/day';
 
-    el('oldw-out').textContent    = oldw.value + ' W';
-    el('neww-out').textContent    = neww.value + ' W';
-    el('lf-old-out').textContent  = Math.round(lfO * 100) + ' %';
-    el('lf-new-out').textContent  = Math.round(lfN * 100) + ' %';
-    el('hrs-out').textContent     = h + ' h/day';
-    el('duty-out').textContent    = Math.round(d * 100) + ' %';
-    el('life-out').textContent    = life.value + ' yr';
-    el('emb-out').textContent     = emb.value + ' %';
-    el('sb-note').textContent = (sO > 0 || sN > 0)
-      ? 'Counted over the ' + (24 - h * d).toFixed(1) + ' h/day the unit is idle but still plugged in. Enter 0 if it is switched off at the socket.'
-      : 'No standby load counted. Most electronics still draw 1–5 W while off — measure it before assuming zero.';
-
-    const subject = category === 'custom'
+    const cat = PRESETS[current].cat;
+    customField.hidden = cat !== 'custom';
+    const subject = cat === 'custom'
       ? (customName.value.trim() || 'Custom comparison')
       : preset.options[preset.selectedIndex].text;
     el('subject').textContent = subject;
-
-    el('rate-field').hidden = !isCustom;
-    el('units-field').hidden = isFlat;
-    if (!isFlat) el('slab-note').textContent =
-      'At ' + Math.round(cycleUnits) + ' units a cycle your top band is ₹'
-      + marginalRate(cycleUnits, sched.slabs).toFixed(2) + '/unit. This saving takes '
-      + cycleSaved.toFixed(0) + ' units off that top, worth ₹' + t.toFixed(2) + '/unit.';
 
     setMetric('m-cost', saving, inr, 'per year');
     setMetric('m-kwh', kwh, roundOf, 'kWh/yr');
@@ -1381,291 +1199,166 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
     if (payback === null) setMetricText('m-pay', '—', c > 0 ? 'no cost saving' : 'add cost');
     else if (payback > 99) setMetricText('m-pay', '99+', 'yr');
     else setMetric('m-pay', payback, v => v.toFixed(1), 'yr');
-    setMetric('m-emb', embKg, roundOf, 'kg');
-    if (cPay === null) setMetricText('m-cpay', '—', 'no CO₂ saving');
-    else if (cPay > 99) setMetricText('m-cpay', '99+', 'yr');
-    else setMetric('m-cpay', cPay, v => v.toFixed(1), 'yr');
-    el('emb-note').textContent = category === 'display'
-      ? '81% is Williams (2004) for computers and CRT displays, cited below. Move the slider to use your own LCA figure.'
-      : category === 'lighting'
-      ? '18% is the complement of the ~82% use-phase share quoted for CFLs below. Move the slider to use your own figure.'
-      : 'This default is an assumption, not a citation. Replace it with a manufacturer or LCA figure if you have one.';
 
-    el('basis-note').innerHTML = measured
-      ? 'From <b>measured</b> readings at ' + V + ' V, running ' + Math.round(runH).toLocaleString('en-IN')
+    let note = measured
+      ? 'From <b>measured</b> readings at ' + V + ' V, running ' + Math.round(M.hours).toLocaleString('en-IN')
         + ' h/year. Real power is V × I × cos φ, not V × I.'
-      : 'From <b>rated nameplate</b> values derated to ' + Math.round(lfO*100) + '% old and '
-        + Math.round(lfN*100) + '% new, at ' + Math.round(d*100)
-        + '% duty cycle. An estimate, not a metered reading — clamp a meter on the actual unit and the figure will differ.';
-    if (eSbOld + eSbNew > 0)
-      el('basis-note').innerHTML += ' Includes <b>' + Math.round(eSbOld + eSbNew)
-        + ' kWh/yr</b> of standby across the two units.';
-    if (t === 0 && kwh > 0)
-      el('basis-note').innerHTML += ' Your consumption sits in the fully subsidised band, so this saving carries no rupee value — the energy and CO₂ savings are still real.';
+      : 'From <b>rated nameplate</b> values derated to ' + Math.round(I.lfO * 100) + '% old and '
+        + Math.round(I.lfN * 100) + '% new, running ' + Math.round(M.hours).toLocaleString('en-IN')
+        + ' h/year. An estimate, not a metered reading — clamp a meter on the actual unit and the figure will differ.';
+    if (tariff === 0 && kwh > 0)
+      note += ' No electricity rate entered, so the saving carries no rupee value — the energy and CO₂ savings are still real.';
+    el('basis-note').innerHTML = note;
 
-    [['old', iOld, kOld, vaOld, wOld, sO, eOld, provIO, provPO, provSO],
-     ['new', iNew, kNew, vaNew, wNew, sN, eNew, provIN, provPN, provSN]].forEach(
-      ([k, i, pf, va, w, sb, e, pI, pP, pS]) => {
+    [['old', iOld, kOld, vaOld, wOld, eOld, provIO, provPO],
+     ['new', iNew, kNew, vaNew, wNew, eNew, provIN, provPN]].forEach(
+      ([k, i, pf, va, w, e, pI, pP]) => {
       el('t-'+k+'-v').innerHTML  = cellHtml(V.toFixed(0), 'V', provV);
-      el('t-'+k+'-i').innerHTML  = cellHtml(i.toFixed(2), 'A', pI);
+      el('t-'+k+'-i').innerHTML  = cellHtml(i.toFixed(3), 'A', pI);
       el('t-'+k+'-pf').innerHTML = cellHtml(pf.toFixed(2), '', pP);
-      el('t-'+k+'-va').innerHTML = cellHtml(va.toFixed(0), 'VA', 'calculated');
+      el('t-'+k+'-va').innerHTML = cellHtml(va.toFixed(1), 'VA', 'calculated');
       el('t-'+k+'-w').innerHTML  = cellHtml(w.toFixed(1), 'W', 'calculated');
-      el('t-'+k+'-sb').innerHTML = cellHtml(sb.toFixed(1), 'W', pS);
-      el('t-'+k+'-e').innerHTML  = cellHtml(e.toFixed(0), 'kWh/yr', 'calculated');
+      el('t-'+k+'-e').innerHTML  = cellHtml(e.toFixed(1), 'kWh/yr', 'calculated');
     });
-    el('t-d-i').innerHTML  = (iOld-iNew).toFixed(2) + '<small>A</small>';
-    el('t-d-va').innerHTML = (vaOld-vaNew).toFixed(0) + '<small>VA</small>';
+    el('t-d-i').innerHTML  = (iOld-iNew).toFixed(3) + '<small>A</small>';
+    el('t-d-va').innerHTML = (vaOld-vaNew).toFixed(1) + '<small>VA</small>';
     el('t-d-w').innerHTML  = (wOld-wNew).toFixed(1) + '<small>W</small>';
-    el('t-d-sb').innerHTML = (sO-sN).toFixed(1) + '<small>W</small>';
-    el('t-d-e').innerHTML  = Math.round(kwh) + '<small>kWh/yr</small>';
+    el('t-d-e').innerHTML  = (eOld-eNew).toFixed(1) + '<small>kWh/yr</small>';
 
     el('meter-label').textContent = measured ? 'Measured real power' : 'Effective real power (derated)';
     el('scale').textContent = '0 — ' + Math.max(wOld, wNew, 1).toFixed(0) + ' W';
     drawRig(wOld, wNew, iOld, iNew, V);
-    if (chartMode === 'carbon') drawChart(eOld * EF, eNew * EF, embKg);
-    else drawChart(eOld * t, eNew * t, c);
+    drawChart(eOld * tariff, eNew * tariff, c);
 
     const lines = measured
-      ? [eq('P(old)', V + ' V × ' + iOld.toFixed(2) + ' A × ' + kOld.toFixed(2) + ' pf = ' + wOld.toFixed(1) + ' W'),
-         eq('P(new)', V + ' V × ' + iNew.toFixed(2) + ' A × ' + kNew.toFixed(2) + ' pf = ' + wNew.toFixed(1) + ' W')]
-      : [eq('P(old)', oldw.value + ' W × ' + lfO.toFixed(2) + ' load = ' + wOld.toFixed(1) + ' W'),
-         eq('P(new)', neww.value + ' W × ' + lfN.toFixed(2) + ' load = ' + wNew.toFixed(1) + ' W')];
-    lines.push(eq('E(old)', wOld.toFixed(1) + ' W × ' + (h * d).toFixed(1) + ' h + ' + sO.toFixed(1)
-      + ' W standby × ' + (24 - h * d).toFixed(1) + ' h, × 365 ÷ 1000 = ' + eOld.toFixed(0) + ' kWh/yr'));
-    lines.push(eq('E(new)', wNew.toFixed(1) + ' W × ' + (h * d).toFixed(1) + ' h + ' + sN.toFixed(1)
-      + ' W standby × ' + (24 - h * d).toFixed(1) + ' h, × 365 ÷ 1000 = ' + eNew.toFixed(0) + ' kWh/yr'));
-    lines.push(eq('saving', eOld.toFixed(0) + ' − ' + eNew.toFixed(0) + ' = ' + kwh.toFixed(0)
-      + ' kWh/yr') + '   |   ' + eq('CO₂', kwh.toFixed(0) + ' × 0.710 = ' + Math.round(co2) + ' kg/yr'));
-    lines.push(isFlat || isCustom
-      ? eq('cost', kwh.toFixed(0) + ' kWh × ₹' + t.toFixed(2) + '/unit flat = ' + inr(saving) + '/yr')
-      : eq('cost', 'bill(' + Math.round(cycleUnits) + ') − bill(' + Math.round(cycleUnits - cycleSaved)
-          + ') = ₹' + t.toFixed(2) + '/unit effective × ' + kwh.toFixed(0) + ' kWh = ' + inr(saving) + '/yr'));
+      ? [eq('P(old)', V + ' V × ' + iOld.toFixed(3) + ' A × ' + kOld.toFixed(2) + ' pf = ' + wOld.toFixed(1) + ' W'),
+         eq('P(new)', V + ' V × ' + iNew.toFixed(3) + ' A × ' + kNew.toFixed(2) + ' pf = ' + wNew.toFixed(1) + ' W')]
+      : [eq('P(old)', I.ratedOld + ' W × ' + I.lfO.toFixed(2) + ' load = ' + wOld.toFixed(1) + ' W'),
+         eq('P(new)', I.ratedNew + ' W × ' + I.lfN.toFixed(2) + ' load = ' + wNew.toFixed(1) + ' W')];
+    lines.push(eq('E(old)', wOld.toFixed(1) + ' W × ' + h + ' h × 365 ÷ 1000 = ' + eOld.toFixed(1) + ' kWh/yr'));
+    lines.push(eq('E(new)', wNew.toFixed(1) + ' W × ' + h + ' h × 365 ÷ 1000 = ' + eNew.toFixed(1) + ' kWh/yr'));
+    lines.push(eq('saving', eOld.toFixed(1) + ' − ' + eNew.toFixed(1) + ' = ' + kwh.toFixed(1)
+      + ' kWh/yr') + '   |   ' + eq('CO₂', kwh.toFixed(1) + ' × 0.710 = ' + co2.toFixed(1) + ' kg/yr'));
+    lines.push(eq('cost saving', kwh.toFixed(1) + ' kWh × ₹' + tariff.toFixed(2) + '/unit = ' + inr(saving) + '/yr'));
     if (payback !== null)
       lines.push(eq('payback', inr(c) + ' ÷ ' + inr(saving) + '/yr = ' + payback.toFixed(1) + ' yr'));
-    lines.push(eq('embodied', eNew.toFixed(0) + ' kWh/yr × ' + lifeY + ' yr × 0.710 × '
-      + embShare.toFixed(2) + '/(1−' + embShare.toFixed(2) + ') = ' + Math.round(embKg) + ' kg CO₂'));
-    if (cPay !== null)
-      lines.push(eq('carbon payback', Math.round(embKg) + ' kg ÷ ' + Math.round(co2)
-        + ' kg/yr = ' + cPay.toFixed(1) + ' yr'));
     el('formula').innerHTML = lines.map(l => '<span>' + l + '</span>').join('');
 
     // collapsed stages still report their state
     el('st-1').textContent = subject;
     el('st-2').textContent = (measured ? 'Measured' : 'Rated') + ' · '
       + wOld.toFixed(0) + ' → ' + wNew.toFixed(0) + ' W';
-    el('st-3').textContent = h + ' h/day · ' + Math.round(d*100) + '% duty';
-    el('st-4').textContent = '₹' + t.toFixed(2) + '/unit · ' + (c > 0 ? inr(c) : 'no cost');
-    el('st-5').textContent = lifeY + ' yr life · ' + emb.value + '% embodied';
+    el('st-3').textContent = h + ' h/day · ₹' + tariff.toFixed(2) + '/unit';
 
     el('print-inputs').textContent =
       'Basis: ' + (measured ? 'measured (V & I)'
-        : 'rated nameplate, derated ' + Math.round(lfO*100) + '% old / ' + Math.round(lfN*100) + '% new')
-      + '   ·   Supply ' + V + ' V   ·   ' + h + ' h/day connected at ' + Math.round(d*100) + '% duty cycle'
-      + '   ·   Standby ' + sO.toFixed(1) + ' / ' + sN.toFixed(1) + ' W'
-      + '   ·   ' + sched.label + ', ₹' + t.toFixed(2) + '/unit effective'
-      + (isFlat ? '' : ' at ' + Math.round(cycleUnits) + ' units per cycle')
+        : 'rated nameplate, derated ' + Math.round(I.lfO*100) + '% old / ' + Math.round(I.lfN*100) + '% new')
+      + '   ·   Supply ' + V + ' V   ·   ' + h + ' h/day in use'
+      + '   ·   ₹' + tariff.toFixed(2) + '/unit'
       + '   ·   Replacement cost ' + (c > 0 ? inr(c) : 'not given')
-      + '   ·   Service life ' + lifeY + ' yr at ' + emb.value + '% embodied'
-      + '   ·   Printed ' + new Date().toISOString().slice(0,10);
+      + '   ·   Printed ' + today();
 
-    const v = verdictFor({cat:category, kwh, payback, cPay, life:lifeY, embKg, co2});
+    const v = verdictFor({cat, kwh, eOld, co2, payback, c});
     el('verdict').className = 'verdict ' + v.cls;
     el('verdict').querySelector('.verdict-tag').textContent = v.tag;
     el('verdict-text').textContent = v.text;
 
     announce(subject + ': saving ' + Math.round(kwh) + ' kilowatt hours and ' + inr(saving)
       + ' per year, ' + Math.round(co2) + ' kilograms of CO2. '
-      + (payback === null ? 'No payback figure.' : 'Payback ' + payback.toFixed(1) + ' years.')
-      + (cPay === null ? '' : ' Carbon payback ' + cPay.toFixed(1) + ' years against a '
-        + lifeY + ' year service life.'));
+      + (payback === null ? 'No payback figure.' : 'Payback ' + payback.toFixed(1) + ' years.'));
 
-    last = {subject, measured, V, provV, h, d, t, c, lfO, lfN, sO, sN,
-            rateLabel:sched.label, cycleUnits, isFlat, lifeY, embShare, embKg, cPay,
-            old:{i:iOld, pf:kOld, va:vaOld, w:wOld, sb:sO, e:eOld, provI:provIO, provP:provPO, provS:provSO},
-            neu:{i:iNew, pf:kNew, va:vaNew, w:wNew, sb:sN, e:eNew, provI:provIN, provP:provPN, provS:provSN},
+    last = {subject, measured, V, provV, h, t:tariff, c, lfO:I.lfO, lfN:I.lfN,
+            old:{i:iOld, pf:kOld, va:vaOld, w:wOld, e:eOld, provI:provIO, provP:provPO},
+            neu:{i:iNew, pf:kNew, va:vaNew, w:wNew, e:eNew, provI:provIN, provP:provPN},
             kwh, saving, co2, payback};
-    updateOverview();
+    updateOverview(V, tariff);
     persist();
   }
 
-  const OV = ['crt', 'cfl', 'fan'];
+  /* ---------- the three project comparisons, side by side ---------- */
   const labelFor = k => preset.querySelector('option[value="' + k + '"]').textContent;
-  function ovShared(){
-    const v = parseFloat(volts.value);
-    return {
-      V:(isFinite(v) && v >= 80 && v <= 270) ? v : 230,
-      sched:SCHEDULES[tariff.value] || SCHEDULES.gross,
-      isCustom:tariff.value === 'custom-rate',
-      customRate:Math.max(0, parseFloat(rate.value) || 0),
-      cycleUnits:Math.max(0, +units.value || 0)
-    };
-  }
-  function ovModel(k, s){
-    const p = PRESETS[k];
-    return model({measured:false, V:s.V, kOld:p.pfOld, kNew:p.pfNew, aOld:0, aNew:0,
-      ratedOld:p.wOld, ratedNew:p.wNew, lfO:p.lfOld / 100, lfN:p.lfNew / 100,
-      sO:p.sbOld, sN:p.sbNew, h:p.h, d:p.duty / 100, sched:s.sched,
-      isCustom:s.isCustom, customRate:s.customRate, cycleUnits:s.cycleUnits,
-      c:p.cost, lifeY:p.life, embShare:p.emb / 100});
-  }
   function buildOverview(){
     el('ov-body').innerHTML = OV.map(k =>
       '<tr data-k="' + k + '"><th scope="row"><button type="button" data-load="' + k + '">'
       + esc(labelFor(k)) + '</button></th>'
-      + '<td data-c="w"></td><td data-c="kwh"></td>'
+      + '<td class="b" data-c="basis"></td><td data-c="w"></td><td data-c="kwh"></td>'
       + '<td class="bar"><span class="barwrap"><i></i></span></td>'
-      + '<td data-c="save"></td><td data-c="co2"></td><td data-c="cpay"></td>'
-      + '<td data-c="verdict"></td></tr>').join('')
-      + '<tr class="total"><th scope="row">All three</th><td></td><td data-t="kwh"></td>'
-      + '<td></td><td data-t="save"></td><td data-t="co2"></td><td data-t="cpay"></td><td></td></tr>';
+      + '<td data-c="save"></td><td data-c="co2"></td><td data-c="pay"></td></tr>').join('')
+      + '<tr class="total"><th scope="row">All three</th><td></td><td></td><td data-t="kwh"></td>'
+      + '<td class="bar"></td><td data-t="save"></td><td data-t="co2"></td><td data-t="pay"></td></tr>';
     el('ov-body').addEventListener('click', e => {
       const b = e.target.closest('button[data-load]');
-      if (!b) return;
-      preset.value = b.dataset.load;
-      applyPreset();
+      if (b) switchPair(b.dataset.load);
     });
   }
-  function updateOverview(){
-    const s = ovShared();
-    const ms = OV.map(k => ovModel(k, s));
-    const peak = Math.max.apply(null, ms.map(m => m.kwh).concat([1]));
-    let tk = 0, ts = 0, tc = 0, te = 0;
-    OV.forEach((k, n) => {
-      const m = ms[n], p = PRESETS[k];
+  function updateOverview(V, tariff){
+    const rows = OV.map(k => {
+      const I = readPair(k, pairs[k] ? pairs[k].f : defaultFields(k, V), V);
+      return {k, I, m:model(I, tariff)};
+    });
+    const peak = Math.max.apply(null, rows.map(r => r.m.kwh).concat([1]));
+    let tk = 0, ts = 0, tc = 0, cost = 0;
+    rows.forEach(({k, I, m}) => {
       const row = el('ov-body').querySelector('tr[data-k="' + k + '"]');
       const put = (c, html) => { row.querySelector('[data-c="' + c + '"]').innerHTML = html; };
-      row.classList.toggle('on', preset.value === k);
+      row.classList.toggle('on', current === k);
+      put('basis', I.measured ? 'Measured' : 'Rated');
       put('w', m.wOld.toFixed(1) + ' → ' + m.wNew.toFixed(1) + '<small>W</small>');
       put('kwh', Math.round(m.kwh).toLocaleString('en-IN') + '<small>kWh/yr</small>');
       row.querySelector('.barwrap i').style.width = (m.kwh / peak * 100).toFixed(1) + '%';
       put('save', inr(m.saving) + '<small>/yr</small>');
       put('co2', Math.round(m.co2).toLocaleString('en-IN') + '<small>kg/yr</small>');
-      put('cpay', m.cPay === null ? '—' : m.cPay > 99 ? '99+' : m.cPay.toFixed(1) + '<small>yr</small>');
-      const keep = m.cPay !== null && m.cPay > p.life;
-      put('verdict', '<span class="chip ' + (keep ? 'keep">Keep' : 'swap">Replace') + '</span>');
-      tk += m.kwh; ts += m.saving; tc += m.co2; te += m.embKg;
+      put('pay', yrs(m.payback));
+      tk += m.kwh; ts += m.saving; tc += m.co2; cost += I.c;
     });
+    const totPay = (cost > 0 && ts > 0) ? cost / ts : null;
     const tot = el('ov-body').querySelector('tr.total');
     const putT = (c, html) => { tot.querySelector('[data-t="' + c + '"]').innerHTML = html; };
     putT('kwh', Math.round(tk).toLocaleString('en-IN') + '<small>kWh/yr</small>');
     putT('save', inr(ts) + '<small>/yr</small>');
     putT('co2', Math.round(tc).toLocaleString('en-IN') + '<small>kg/yr</small>');
-    putT('cpay', tc > 0 ? (te / tc).toFixed(1) + '<small>yr</small>' : '—');
-    el('ov-note').textContent = 'Preset figures for each pair, priced at your tariff';
+    putT('pay', yrs(totPay));
+    el('ov-note').textContent = 'Your figures for each pair you have opened, preset figures otherwise';
+    lastOv = {rows, tk, ts, tc, cost, totPay};
   }
-
-  /* ---------- audit summary ---------- */
-  const sum = () => audit.reduce((a, r) => ({
-    wOld:a.wOld + r.wOld, wNew:a.wNew + r.wNew, kwh:a.kwh + r.kwh,
-    saving:a.saving + r.saving, co2:a.co2 + r.co2, cost:a.cost + r.cost,
-    embKg:a.embKg + (r.embKg || 0)
-  }), {wOld:0, wNew:0, kwh:0, saving:0, co2:0, cost:0, embKg:0});
-  const yrs = v => v === null ? '—' : v > 99 ? '99+' : v.toFixed(1) + '<small>yr</small>';
-
-  function renderAudit(){
-    const n = audit.length;
-    el('count').textContent = n ? '· ' + n + (n === 1 ? ' pair' : ' pairs') : '';
-    el('summary-wrap').hidden = !n;
-    el('summary-exports').hidden = !n;
-    el('summary-empty').hidden = !!n;
-    if (!n) return;
-    const tot = sum();
-    const totPay = (tot.cost > 0 && tot.saving > 0) ? tot.cost / tot.saving : null;
-    el('summary-body').innerHTML = audit.map((r, i) =>
-      '<tr' + (i === justAdded ? ' class="in"' : '') + '><th scope="row">' + esc(r.subject) + '</th>'
-      + '<td class="b">' + (r.measured ? 'Measured' : 'Rated') + '</td>'
-      + '<td>' + r.wOld.toFixed(1) + '<small>W</small></td>'
-      + '<td>' + r.wNew.toFixed(1) + '<small>W</small></td>'
-      + '<td>' + Math.round(r.kwh).toLocaleString('en-IN') + '<small>kWh/yr</small></td>'
-      + '<td>' + inr(r.saving) + '<small>/yr</small></td>'
-      + '<td>' + Math.round(r.co2).toLocaleString('en-IN') + '<small>kg/yr</small></td>'
-      + '<td>' + yrs(r.payback) + '</td>'
-      + '<td>' + Math.round(r.embKg || 0).toLocaleString('en-IN') + '<small>kg</small></td>'
-      + '<td>' + yrs(r.cPay === undefined ? null : r.cPay) + '</td>'
-      + '<td><button type="button" class="rm" data-i="' + i + '" aria-label="Remove ' + esc(r.subject) + '">&#10005;</button></td></tr>'
-    ).join('')
-    + '<tr class="total"><th scope="row">Total — ' + n + ' pairs</th><td></td>'
-    + '<td>' + tot.wOld.toFixed(1) + '<small>W</small></td>'
-    + '<td>' + tot.wNew.toFixed(1) + '<small>W</small></td>'
-    + '<td>' + Math.round(tot.kwh).toLocaleString('en-IN') + '<small>kWh/yr</small></td>'
-    + '<td>' + inr(tot.saving) + '<small>/yr</small></td>'
-    + '<td>' + Math.round(tot.co2).toLocaleString('en-IN') + '<small>kg/yr</small></td>'
-    + '<td>' + yrs(totPay) + '</td>'
-    + '<td>' + Math.round(tot.embKg).toLocaleString('en-IN') + '<small>kg</small></td>'
-    + '<td>' + yrs(tot.co2 > 0 && tot.embKg > 0 ? tot.embKg / tot.co2 : null) + '</td>'
-    + '<td></td></tr>';
-    justAdded = -1;
-  }
-
-  el('btn-add').addEventListener('click', () => {
-    audit.push({subject:last.subject, measured:last.measured, wOld:last.old.w, wNew:last.neu.w,
-                kwh:last.kwh, saving:last.saving, co2:last.co2, cost:last.c, payback:last.payback,
-                embKg:last.embKg, cPay:last.cPay, lifeY:last.lifeY});
-    justAdded = audit.length - 1;
-    renderAudit();
-    persist();
-    flash(el('btn-add'), '+ Added');
-    // The summary sits well below the fold; without this the button looks dead.
-    el('summary-wrap').scrollIntoView({behavior: REDUCE ? 'auto' : 'smooth', block:'nearest'});
-  });
-  el('summary-body').addEventListener('click', e => {
-    const b = e.target.closest('.rm'); if (!b) return;
-    audit.splice(+b.dataset.i, 1); renderAudit(); persist();
-  });
-  el('btn-clear').addEventListener('click', () => { audit.length = 0; renderAudit(); persist(); });
 
   /* ---------- export ---------- */
-  const n2 = x => x.toFixed(2), n1 = x => x.toFixed(1), n0 = x => x.toFixed(0);
+  const n3 = x => x.toFixed(3), n2 = x => x.toFixed(2), n1 = x => x.toFixed(1), n0 = x => x.toFixed(0);
   const rowsFor = L => [
     ['Appliance','Voltage (V)','Voltage source','Current (A)','Current source',
-     'Power factor','Power factor source','Apparent power (VA)','Real power (W)',
-     'Standby (W)','Standby source','Energy (kWh/yr)'],
-    ['Old', n0(L.V), L.provV, n2(L.old.i), L.old.provI, n2(L.old.pf), L.old.provP,
-     n0(L.old.va), n1(L.old.w), n1(L.old.sb), L.old.provS, n0(L.old.e)],
-    ['New', n0(L.V), L.provV, n2(L.neu.i), L.neu.provI, n2(L.neu.pf), L.neu.provP,
-     n0(L.neu.va), n1(L.neu.w), n1(L.neu.sb), L.neu.provS, n0(L.neu.e)],
-    ['Saving','','', n2(L.old.i - L.neu.i),'','','',
-     n0(L.old.va - L.neu.va), n1(L.old.w - L.neu.w), n1(L.old.sb - L.neu.sb), '', n0(L.kwh)]
+     'Power factor','Power factor source','Apparent power (VA)','Real power (W)','Energy (kWh/yr)'],
+    ['Old', n0(L.V), L.provV, n3(L.old.i), L.old.provI, n2(L.old.pf), L.old.provP,
+     n1(L.old.va), n1(L.old.w), n1(L.old.e)],
+    ['New', n0(L.V), L.provV, n3(L.neu.i), L.neu.provI, n2(L.neu.pf), L.neu.provP,
+     n1(L.neu.va), n1(L.neu.w), n1(L.neu.e)],
+    ['Saving','','', n3(L.old.i - L.neu.i),'','','',
+     n1(L.old.va - L.neu.va), n1(L.old.w - L.neu.w), n1(L.old.e - L.neu.e)]
   ];
-  function summaryRows(){
-    const tot = sum();
-    const totPay = (tot.cost > 0 && tot.saving > 0) ? n1(tot.cost / tot.saving) : 'n/a';
-    const totCPay = (tot.co2 > 0 && tot.embKg > 0) ? n1(tot.embKg / tot.co2) : 'n/a';
+  function overviewRows(){
+    const o = lastOv;
     return [['Appliance pair','Basis','Old real power (W)','New real power (W)',
              'Energy saved (kWh/yr)','Cost saved (INR/yr)','CO2 avoided (kg/yr)',
-             'Replacement cost (INR)','Simple payback (years)',
-             'Embodied CO2 of new unit (kg)','Carbon payback (years)','Service life (years)']]
-      .concat(audit.map(r => [r.subject, r.measured ? 'Measured' : 'Rated', n1(r.wOld), n1(r.wNew),
-              n0(r.kwh), n0(r.saving), n0(r.co2), n0(r.cost),
-              r.payback === null ? 'n/a' : n1(r.payback),
-              n0(r.embKg || 0),
-              (r.cPay === null || r.cPay === undefined) ? 'n/a' : n1(r.cPay),
-              String(r.lifeY === undefined ? '' : r.lifeY)]),
-        [['TOTAL','', n1(tot.wOld), n1(tot.wNew), n0(tot.kwh), n0(tot.saving), n0(tot.co2),
-          n0(tot.cost), totPay, n0(tot.embKg), totCPay, '']]);
+             'Replacement cost (INR)','Simple payback (years)']]
+      .concat(o.rows.map(({k, I, m}) => [labelFor(k), I.measured ? 'Measured' : 'Rated',
+        n1(m.wOld), n1(m.wNew), n1(m.kwh), n0(m.saving), n1(m.co2), n0(I.c),
+        m.payback === null ? 'n/a' : n1(m.payback)]),
+      [['TOTAL','','','', n1(o.tk), n0(o.ts), n1(o.tc), n0(o.cost),
+        o.totPay === null ? 'n/a' : n1(o.totPay)]]);
   }
   function csvFor(L){
     const q = s => /[",\n]/.test(s) ? '"' + String(s).replace(/"/g,'""') + '"' : s;
-    let all = [['Energy audit of e-waste'], ['Comparison', L.subject],
+    const all = [['Energy audit of e-waste'], ['Comparison', L.subject],
       ['Measurement basis', L.measured ? 'Measured (voltage & current)' : 'Rated nameplate'],
       ['Load factor old (%)', L.measured ? 'n/a' : n0(L.lfO*100)],
       ['Load factor new (%)', L.measured ? 'n/a' : n0(L.lfN*100)],
-      ['Hours connected (h/day)', String(L.h)], ['Duty cycle (%)', n0(L.d*100)],
-      ['Standby old (W)', n1(L.sO)], ['Standby new (W)', n1(L.sN)],
-      ['Tariff schedule', L.rateLabel],
-      ['Bi-monthly consumption (units)', L.isFlat ? 'n/a' : n0(L.cycleUnits)],
-      ['Effective rate (INR/unit)', n2(L.t)],
+      ['Hours used (h/day)', String(L.h)],
+      ['Electricity rate (INR/unit)', n2(L.t)],
       ['Replacement cost (INR)', n0(L.c)], ['Emission factor (kg CO2/kWh)', '0.710'],
-      ['Service life of new unit (years)', String(L.lifeY)],
-      ['Embodied share of lifecycle energy (%)', n0(L.embShare*100)],
-      ['Exported', new Date().toISOString().slice(0,10)], []]
-      .concat(rowsFor(L), [[], ['Annual energy saved (kWh)', n0(L.kwh)],
-        ['Annual cost saving (INR)', n0(L.saving)], ['CO2 avoided (kg/yr)', n0(L.co2)],
+      ['Exported', today()], []]
+      .concat(rowsFor(L), [[], ['Annual energy saved (kWh)', n1(L.kwh)],
+        ['Annual cost saving (INR)', n0(L.saving)], ['CO2 avoided (kg/yr)', n1(L.co2)],
         ['Simple payback (years)', L.payback === null ? 'n/a' : n1(L.payback)],
-        ['Embodied CO2 of new unit (kg)', n0(L.embKg)],
-        ['Carbon payback (years)', L.cPay === null ? 'n/a' : n1(L.cPay)]]);
-    if (audit.length) all = all.concat([[], ['AUDIT SUMMARY — all pairs added']], summaryRows());
+        [], ['ALL THREE PROJECT COMPARISONS']], overviewRows());
     return all.map(r => r.map(q).join(',')).join('\r\n');
   }
   const tsv = rows => rows.map(r => r.join('\t')).join('\n');
@@ -1693,17 +1386,13 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
     const btn = el('btn-copy');
     flash(btn, (await copyText(tsv(rowsFor(last)))) ? 'Copied' : 'Copy failed');
   });
-  el('btn-copy-sum').addEventListener('click', async () => {
-    const btn = el('btn-copy-sum');
-    flash(btn, (await copyText(tsv(summaryRows()))) ? 'Copied' : 'Copy failed');
-  });
   el('btn-csv').addEventListener('click', () => {
-    // BOM so Excel reads the UTF-8 arrows and rupee signs correctly
+    // BOM so Excel reads the UTF-8 arrows correctly
     const blob = new Blob(['﻿' + csvFor(last)], {type:'text/csv;charset=utf-8'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'energy-audit-' +
-      last.subject.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') + '.csv';
+      (last.subject.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'pair') + '.csv';
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     flash(el('btn-csv'), 'Downloaded');
@@ -1711,39 +1400,24 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
   el('btn-print').addEventListener('click', () => window.print());
 
   /* ---------- wiring ---------- */
-  function applyPreset(){
-    const p = PRESETS[preset.value];
-    category = p.cat;
-    customField.hidden = p.cat !== 'custom';
-    // Custom keeps whatever the student has already dialled in — only the
-    // named pairs overwrite the fields with their own figures.
-    if (p.cat !== 'custom'){
-      oldw.value = p.wOld; neww.value = p.wNew;
-      lfOld.value = p.lfOld; lfNew.value = p.lfNew;
-      sbOld.value = p.sbOld; sbNew.value = p.sbNew;
-      hrs.value = p.h; duty.value = p.duty; cost.value = p.cost;
-      life.value = p.life; emb.value = p.emb;
-      pfOld.value = p.pfOld.toFixed(2); pfNew.value = p.pfNew.toFixed(2);
-      activePf = {old:p.pfOld, neu:p.pfNew};
-      const V = Math.max(1, +volts.value || 230);
-      ampsOld.value = (p.wOld * p.lfOld/100 / (V * p.pfOld)).toFixed(2);
-      ampsNew.value = (p.wNew * p.lfNew/100 / (V * p.pfNew)).toFixed(2);
-      touched.pfOld = touched.pfNew = touched.ampsOld = touched.ampsNew = false;
-      touched.sbOld = touched.sbNew = false;
-    } else customName.focus();
+  // The outgoing pair was stashed by the calc() that followed its last edit,
+  // so switching only has to bring the incoming one onto the bench. A pair
+  // opened for the first time takes its preset, on the basis already in use.
+  function switchPair(k){
+    const saved = pairs[k];
+    current = k; preset.value = k;
+    load(saved ? saved.f : Object.assign(defaultFields(k, readV().V), {basis:basis.value}));
+    PAIR_TOUCH.forEach(t => { touched[t] = !!(saved && saved.t && saved.t[t]); });
     calc();
   }
 
   /* ---------- persistence ----------
-     A lab session outlives a page load. Without this a student banks three
-     pairs, the phone sleeps, and the whole audit is gone. The blob is
-     versioned so a later schema change falls back to defaults rather than
+     A lab session outlives a page load. Without this a student enters three
+     sets of readings, the phone sleeps, and the whole audit is gone. The blob
+     is versioned so a later schema change falls back to defaults rather than
      restoring nonsense, and every access is guarded: private windows and
      storage-blocked browsers throw on the property itself. */
-  const STORE = 'energy-audit-v1';
-  const FIELDS = ['preset','custom-name','basis','volts','oldw','neww','lf-old','lf-new',
-                  'amps-old','amps-new','pf-old','pf-new','sb-old','sb-new',
-                  'hrs','duty','tariff','units','rate','cost','life','emb'];
+  const STORE = 'energy-audit-v2';
   let saveTimer;
   function persist(){
     // Debounced: calc() runs on every slider tick, and a synchronous write
@@ -1751,40 +1425,44 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
       try {
-        const f = {};
-        FIELDS.forEach(id => { f[id] = el(id).value; });
-        localStorage.setItem(STORE, JSON.stringify({v:1, f, touched, audit}));
+        localStorage.setItem(STORE, JSON.stringify({v:2, current, name:customName.value,
+          volts:volts.value, rate:rate.value, voltsTouched:touched.volts, pairs}));
       } catch (e) { /* private mode, quota, storage disabled — nothing to do */ }
     }, 400);
   }
   function restore(){
     let blob = null;
     try { blob = JSON.parse(localStorage.getItem(STORE) || 'null'); } catch (e) { return false; }
-    if (!blob || blob.v !== 1 || !blob.f || !PRESETS[blob.f.preset]) return false;
-    FIELDS.forEach(id => { if (blob.f[id] !== undefined) el(id).value = blob.f[id]; });
-    Object.keys(touched).forEach(k => { touched[k] = !!(blob.touched && blob.touched[k]); });
-    const p = PRESETS[blob.f.preset];
-    category = p.cat;
-    activePf = {old:p.pfOld, neu:p.pfNew};
-    customField.hidden = p.cat !== 'custom';
-    if (Array.isArray(blob.audit)) blob.audit.forEach(r => audit.push(r));
+    if (!blob || blob.v !== 2 || !PRESETS[blob.current] || !blob.pairs) return false;
+    Object.keys(PRESETS).forEach(k => {
+      const s = blob.pairs[k];
+      if (!s || !s.f || typeof s.f !== 'object') return;
+      const f = {}, t = {};
+      PAIR_FIELDS.forEach(id => { if (s.f[id] !== undefined) f[id] = String(s.f[id]); });
+      PAIR_TOUCH.forEach(x => { t[x] = !!(s.t && s.t[x]); });
+      pairs[k] = {f, t};
+    });
+    if (typeof blob.name === 'string') customName.value = blob.name;
+    if (blob.volts !== undefined) volts.value = blob.volts;
+    if (blob.rate !== undefined) rate.value = blob.rate;
+    touched.volts = !!blob.voltsTouched;
+    switchPair(blob.current);
     return true;
   }
-  // Persistence needs an escape hatch, or a bad state is permanent. This
-  // resets the inputs only — banked pairs have their own Clear all.
-  function resetInputs(){
-    basis.value = 'rated'; volts.value = '230';
-    tariff.value = 'gross'; units.value = '450'; rate.value = '6.65';
-    preset.value = 'crt';
+  // Persistence needs an escape hatch, or a bad state is permanent.
+  function resetAll(){
+    Object.keys(pairs).forEach(k => { delete pairs[k]; });
     Object.keys(touched).forEach(k => { touched[k] = false; });
-    applyPreset();
+    volts.value = '230'; rate.value = '6.65'; customName.value = '';
+    basis.value = 'rated';
+    switchPair('crt');
     flash(el('btn-reset'), 'Reset');
   }
 
   /* ---------- self-check ----------
      Runs only with ?selftest in the URL, so a student never sees it. It
-     covers the two pieces of arithmetic that are easy to get quietly wrong:
-     telescopic billing and the embodied-carbon derivation. */
+     covers the arithmetic every figure on the page depends on, and the two
+     fallbacks that keep a blank field from flattering the result. */
   function selfTest(){
     if (location.search.indexOf('selftest') < 0) return;
     const out = [];
@@ -1792,57 +1470,50 @@ table.t{border-collapse:collapse;width:100%;min-width:780px}
       out.push((Math.abs(got - want) <= tol ? 'PASS ' : 'FAIL ') + what
                + ' — got ' + got + ', want ' + want);
     };
-    const G = SCHEDULES.gross.slabs, N = SCHEDULES.net.slabs;
-    near(billFor(0, G), 0, 1e-9, 'an empty bill is zero');
-    near(billFor(450, G), 2312.5, 1e-6, 'gross 450 units bills telescopically');
-    near(billFor(1100, G), 8940, 1e-6, 'gross runs on into the open top band');
-    near(billFor(150, N), 117.5, 1e-6, 'net schedule leaves the first 100 units free');
-    near(marginalRate(450, G), 6.65, 1e-9, 'top band at 450 units');
-    near(marginalRate(1500, G), 12.15, 1e-9, 'top band above 1000 units');
-    near(effectiveRate(420, 40, G), 5.80, 1e-6, 'a saving straddling 400 is priced across both bands');
-    near(effectiveRate(450, 0, G), 6.65, 1e-9, 'zero saving falls back to the marginal rate');
-    near(3 * 18 * 365 / 1000, 19.71, 1e-9, 'standby energy over an 18 h idle day');
-    near(29 * 8 * EF * (.81 / (1 - .81)), 702.2, .5, 'embodied carbon from the cited share');
-    const crt = PRESETS.crt;
-    const mc = model({measured:false, V:230, kOld:crt.pfOld, kNew:crt.pfNew, aOld:0, aNew:0,
-      ratedOld:crt.wOld, ratedNew:crt.wNew, lfO:crt.lfOld / 100, lfN:crt.lfNew / 100,
-      sO:crt.sbOld, sN:crt.sbNew, h:crt.h, d:crt.duty / 100, sched:SCHEDULES.gross,
-      isCustom:false, customRate:0, cycleUnits:450, c:crt.cost, lifeY:crt.life,
-      embShare:crt.emb / 100});
-    near(mc.wOld, 66, 1e-9, 'model derates the old unit at its own load factor');
-    near(mc.wNew, 18.7, 1e-9, 'model derates the new unit at its own load factor');
-    near(mc.kwh, 121.326, 1e-6, 'model reproduces the CRT energy saving');
-    near(mc.embKg, 1039.37, .05, 'model reproduces the CRT embodied carbon');
-    near(mc.cPay, 12.07, .02, 'model reproduces the CRT carbon payback');
-    near(mc.t, 6.65, 1e-9, 'model prices the CRT saving in the 401-500 band');
+    const run = (k, over, tariff) =>
+      model(readPair(k, Object.assign(defaultFields(k, 230), over || {}), 230), tariff);
+    const crt = run('crt', null, 6.65);
+    near(crt.wOld, 66, 1e-9, 'CRT derated at its own load factor');
+    near(crt.wNew, 18.7, 1e-9, 'LED monitor derated at its own load factor');
+    near(crt.iOld, 66 / (230 * .65), 1e-9, 'rated current is P / (V x pf)');
+    near(crt.vaOld, 66 / .65, 1e-9, 'apparent power is V x I');
+    near(crt.eOld, 144.54, 1e-9, 'CRT energy: 66 W x 6 h x 365 / 1000');
+    near(crt.eNew, 40.953, 1e-9, 'LED monitor energy');
+    near(crt.kwh, 103.587, 1e-9, 'CRT pair energy saving');
+    near(crt.co2, 73.54677, 1e-5, 'CO2 is saving x 0.710');
+    near(crt.saving, 688.85355, 1e-5, 'cost saving is kWh x rate');
+    near(crt.payback, 7000 / 688.85355, 1e-6, 'payback is cost / annual saving');
+    near(run('cfl', null, 6.65).kwh, 9.125, 1e-9, 'CFL pair energy saving');
+    near(run('fan', null, 6.65).kwh, 187.245, 1e-9, 'fan pair energy saving');
+    const meas = run('crt', {basis:'measured', 'amps-old':'0.5', 'amps-new':'0.1'}, 6.65);
+    near(meas.wOld, 230 * .5 * .65, 1e-9, 'measured power is V x I x pf');
+    near(meas.wNew, 230 * .1 * .60, 1e-9, 'measured power, new unit');
+    const blank = run('crt', {basis:'measured', 'amps-new':''}, 6.65);
+    near(blank.wNew, 18.7, 1e-9, 'a blank current falls back to the nameplate estimate, not 0 A');
+    const noPf = run('crt', {'pf-old':'', 'pf-new':'7'}, 6.65);
+    near(noPf.iOld, 66 / (230 * .65), 1e-9, 'a blank power factor falls back to the typical value, not 1');
+    near(noPf.iNew, 18.7 / (230 * .60), 1e-9, 'an out-of-range power factor falls back too');
+    near(run('crt', null, 0).saving, 0, 1e-9, 'no rate means no rupee saving');
     const bad = out.filter(l => l.indexOf('FAIL') === 0).length;
     window.__selftest = {passed: out.length - bad, failed: bad, log: out};
     console.log('[energy-audit selftest] ' + (out.length - bad) + '/' + out.length + ' passed');
     out.forEach(l => console.log('  ' + l));
   }
-  preset.addEventListener('change', applyPreset);
+
+  preset.addEventListener('change', () => {
+    switchPair(preset.value);
+    if (current === 'custom') customName.focus();
+  });
   basis.addEventListener('change', calc);
-  tariff.addEventListener('change', calc);
   [['volts','volts'],['amps-old','ampsOld'],['amps-new','ampsNew'],
-   ['pf-old','pfOld'],['pf-new','pfNew'],['sb-old','sbOld'],['sb-new','sbNew']].forEach(([id, key]) => {
+   ['pf-old','pfOld'],['pf-new','pfNew']].forEach(([id, key]) => {
     el(id).addEventListener('input', () => { touched[key] = true; });
   });
   [customName, oldw, neww, lfOld, lfNew, volts, ampsOld, ampsNew, pfOld, pfNew,
-   sbOld, sbNew, hrs, duty, tariff, units, rate, cost, life, emb]
-    .forEach(x => x.addEventListener('input', calc));
-  el('btn-reset').addEventListener('click', resetInputs);
-  el('mode-seg').addEventListener('click', e => {
-    const b = e.target.closest('button');
-    if (!b || b.dataset.mode === chartMode) return;
-    chartMode = b.dataset.mode;
-    el('mode-seg').querySelectorAll('button').forEach(x =>
-      x.setAttribute('aria-pressed', String(x.dataset.mode === chartMode)));
-    firstChart = true;
-    calc();
-  });
+   hrs, rate, cost].forEach(x => x.addEventListener('input', calc));
+  el('btn-reset').addEventListener('click', resetAll);
   buildOverview();
-  if (restore()) calc(); else applyPreset();
-  renderAudit();
+  if (!restore()) switchPair('crt');
   selfTest();
 })();
 </script>

@@ -3,10 +3,17 @@
 Single-page measurement bench for an energy audit of obsolete appliances.
 No build step, no dependencies — `index.html` is the whole site.
 
-Enter voltage, current and power factor for an appliance and its replacement
-(or derate a nameplate rating) and it returns real power, annual energy, cost
-against the telescopic TANGEDCO slabs, CO2, simple payback, and the carbon
-payback of manufacturing the replacement.
+It compares the three pairs the project names:
+
+- Old CRT monitor vs LED monitor
+- CFL lamp vs LED lamp
+- Old induction fan vs BLDC fan
+
+For each pair, enter voltage, current and power factor for the old appliance
+and its replacement (or derate a nameplate rating) and it returns apparent
+power, real power, annual energy, the energy saved, the cost saved at your
+electricity rate, the CO2 avoided and the simple payback. A table at the
+bottom totals all three pairs. A fourth "custom" slot takes any other pair.
 
 ## Deploy
 
@@ -22,17 +29,15 @@ project's Settings > Git, or deploy by hand:
 
 ## Running it locally
 
-Open `index.html` directly and everything works except saved state: Chrome
-blocks `localStorage` on `file://`, so inputs and banked pairs will not
-survive a reload. Serve it over HTTP to get that back:
+Open `index.html` directly, or serve the folder:
 
     npx serve .          # or: python -m http.server
 
 ## Tests
 
-Arithmetic checks for the telescopic tariff and the embodied-carbon
-derivation are built into the page. Append `?selftest` to the URL and read the
-console:
+Arithmetic checks are built into the page: power, energy, saving, CO2, cost
+and payback for the preset pairs, plus the fallbacks for a blank current or
+power factor. Append `?selftest` to the URL and read the console:
 
     http://localhost:3000/?selftest
 
@@ -41,10 +46,13 @@ runner.
 
 ## Notes
 
-- Tariff slabs, the CEA emission factor and the embodied-energy shares are all
-  documented in the page footer, including which figures are cited and which
-  are assumptions.
+- The preset wattages, load factors and power factors are typical values, not
+  readings. Replace them with your own measurements.
 - Every table cell is labelled `measured`, `derived`, `typical` or
   `calculated`, so a printed sheet never passes an assumption off as a reading.
-- Inputs and banked pairs are stored in the visitor's browser only. Nothing is
-  uploaded.
+- The emission factor is 0.710 kg CO2/kWh (CEA CO2 Baseline Database v21.0,
+  FY 2024-25, national grid average).
+- The electricity rate is a single flat figure you enter; the default is only
+  an example.
+- Each pair keeps its own inputs, stored in the visitor's browser only.
+  Nothing is uploaded.
